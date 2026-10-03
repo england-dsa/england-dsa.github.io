@@ -1,0 +1,52 @@
+---
+title: "Ride the Buffalo Weather Balloon"
+description: "An interactive, plain-language ride up the latest National Weather Service balloon from Buffalo airport. It loads the newest flight by itself."
+date: 2026-10-03
+categories: [JavaScript, Weather, Interactive, API]
+image: thumbnail.png
+---
+
+Twice a day, the National Weather Service releases a balloon from Buffalo airport. It carries a small instrument that measures temperature, humidity and wind on the way up, to about 20 miles above the ground. Forecasters read the result as a dense technical chart. This page shows the same flight in plain language: move the balloon and see what it felt at each height.
+
+::: {.column-page-inset}
+
+{{< include _balloon.html >}}
+
+:::
+
+## How to read it
+
+- **The sky column** on the left is height. The white balloon marks where you are, and white patches are layers where cloud is likely.
+- **The red line** is temperature and **the blue line** is wind speed, both at the same heights as the sky column.
+- **Click or drag on the chart**, or use the slider, to move the balloon. *Play the flight* runs the whole climb.
+- **What this flight found** is written fresh for each flight from its own readings. *Take the balloon there* jumps to that height.
+- **Where weather happens** zooms in on the lowest 8 miles, where clouds, rain and snow form.
+
+## Why it matters for Buffalo
+
+The feature to watch in winter is the lid: a layer where the air gets warmer with height instead of colder. Lake-effect snow clouds grow upward from Lake Erie until they hit that lid. A high lid means deep clouds and heavy snow. A low lid means shallow clouds and flurries. Warm air sitting above a freezing surface is the other pattern to look for, because it is the setup for sleet and freezing rain.
+
+## The data
+
+Readings come from the [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/archive/raob/), which archives every National Weather Service balloon flight and offers them through a free public API.
+
+The page has no stored data and no scheduled job. Each time it opens, the visitor's browser asks the API for the most recent Buffalo flight and draws it. If that flight has not been posted yet, it steps back 12 hours at a time until it finds one. The date picker loads any earlier flight the same way, and every flight has its own link.
+
+## What is estimated
+
+- **Cloud layers.** The balloon measures humidity, not cloud. Layers are marked where the air was close to saturated, so they are likely but not confirmed.
+- **The drift path and the time after launch.** This data source has no GPS track, so both are worked out from the measured winds and a typical climb rate of 1,000 feet a minute. Tested against one flight with a real GPS track, the estimate was 92 miles and the track was 94.
+- **Detail.** Each flight arrives as roughly 100 to 200 levels, not every second of the climb, so thin layers are placed approximately.
+
+## Limits
+
+- **It depends on the data service.** If the Iowa Mesonet is unavailable, the page says so and shows nothing until it is back.
+- **Some flights are missing or end early.** Balloons are occasionally not launched or burst low. The page reports what it has.
+- **One balloon is one place.** Conditions a few miles away, especially in a lake-effect band, can differ.
+
+## What's next
+
+- Compare two flights side by side, such as a lake-effect day and a clear day.
+- Add Lake Erie's water temperature, to show how much warmer the lake is than the air above it.
+
+[View the code on GitHub](https://github.com/england-dsa/england-dsa.github.io/tree/main/projects/buffalo-balloon-flight)

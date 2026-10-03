@@ -1,0 +1,448 @@
+<!-- Buffalo Balloon Flight: interactive sounding viewer. Data is fetched in the browser from the Iowa Environmental Mesonet API. -->
+<style>
+.bbf{--surface:#FFFFFF;--bg:#FFFFFF;--ink:#12233B;--muted:#55657C;--line:#D6DEE9;--grid:#E6EBF2;--accent:#1B5FB8;--accent-ink:#FFFFFF;--temp:#C92A2A;--wind:#1971C2;
+  color:var(--ink);display:flex;flex-direction:column;gap:22px;margin-block:1.75rem;line-height:1.5;font-size:1rem}
+.bbf *{box-sizing:border-box}
+.bbf [hidden]{display:none!important}
+.bbf p,.bbf dl,.bbf dd,.bbf ul,.bbf h3,.bbf h4,.bbf label{margin:0;padding:0}
+.bbf h3{font-size:1.4rem;font-weight:700;border:0;line-height:1.15}
+.bbf h4{font-size:1.08rem;font-weight:700;line-height:1.2}
+.bbf-when{font-size:.82rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.bbf-picker{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;border-block:1px solid var(--line);padding-block:12px}
+.bbf-lab{font-size:.8rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.bbf-picker input,.bbf-picker select,.bbf-ghost{font:inherit;font-size:.9rem;line-height:1.4;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.bbf-ghost{cursor:pointer;font-weight:500}
+.bbf-ghost:disabled{opacity:.45;cursor:default}
+.bbf-controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.bbf-seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:3px}
+.bbf-seg button{font:inherit;font-size:.86rem;font-weight:500;line-height:1.4;border:0;background:transparent;color:var(--muted);padding:6px 13px;border-radius:999px;cursor:pointer}
+.bbf-seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.bbf-btn{font:inherit;font-size:.9rem;font-weight:600;line-height:1.4;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);padding:8px 16px;cursor:pointer}
+.bbf button:focus-visible,.bbf input:focus-visible,.bbf select:focus-visible,.bbf summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bbf-status{background:#F4F7FB;border:1px solid var(--line);border-radius:14px;padding:26px 22px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.bbf-status strong{font-size:1.2rem}
+.bbf-status p{color:var(--muted);max-width:60ch}
+.bbf-content{display:flex;flex-direction:column;gap:30px}
+.bbf-flight{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+.bbf-chartbox{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 12px 8px}
+#bbf-chart{display:block;width:100%;cursor:crosshair;user-select:none;-webkit-user-select:none}
+#bbf-chart text,#bbf-map text{font-family:inherit;font-variant-numeric:tabular-nums}
+.bbf-readout{position:sticky;top:84px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.bbf-big{font-weight:700;font-size:2.4rem;line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+.bbf-sub{color:var(--muted);font-size:.95rem;margin-top:6px}
+.bbf-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;border-block:1px solid var(--line);padding-block:14px}
+.bbf-stats dt{font-size:.74rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+.bbf-stats dd{margin-top:2px;font-size:1.3rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.bbf-stats dd small{display:block;font-size:.86rem;font-weight:400;color:var(--muted)}
+.bbf-key{width:14px;height:3px;border-radius:2px;display:inline-block}
+.bbf-say{min-height:6em}
+.bbf-slider{display:flex;flex-direction:column;gap:4px}
+.bbf-slider label{font-size:.8rem;color:var(--muted)}
+.bbf-slider input{width:100%;accent-color:var(--accent)}
+.bbf-sec{display:flex;flex-direction:column;gap:12px}
+.bbf-finds{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:0 32px}
+.bbf-finds li{border-top:1px solid var(--line);padding-block:16px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.bbf-finds p{color:var(--muted);font-size:.97rem}
+.bbf-link{font:inherit;font-size:.88rem;font-weight:600;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.bbf-mapbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+#bbf-map{display:block;width:100%}
+.bbf-cap{color:var(--muted);font-size:.95rem;max-width:68ch}
+.bbf details{border-top:1px solid var(--line);padding-top:14px}
+.bbf summary{cursor:pointer;font-weight:600}
+.bbf-tablewrap{overflow-x:auto;margin-top:12px}
+.bbf table{border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums;min-width:460px;width:100%;margin:0}
+.bbf th,.bbf td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.bbf th:first-child,.bbf td:first-child{text-align:left}
+.bbf th{color:var(--muted);font-weight:600;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}
+@media (max-width:860px){
+  .bbf-flight{grid-template-columns:minmax(0,1fr)}
+  .bbf-readout{position:static;order:-1}
+  .bbf-say{min-height:0}
+  .bbf-big{font-size:2.1rem}
+}
+</style>
+<div id="bbf-root" class="bbf"></div>
+<script>
+(function(){
+document.getElementById("bbf-root").innerHTML=`<p class="bbf-when" id="bbf-when">Loading the latest flight&hellip;</p>
+<div class="bbf-picker">
+  <span class="bbf-lab">Flight</span>
+  <button class="bbf-ghost" id="bbf-prev" type="button" aria-label="Earlier flight">&larr; Earlier</button>
+  <input type="date" id="bbf-date" aria-label="Launch date">
+  <select id="bbf-slot" aria-label="Morning or evening launch"><option value="am">Morning launch</option><option value="pm">Evening launch</option></select>
+  <button class="bbf-ghost" id="bbf-next" type="button" aria-label="Later flight">Later &rarr;</button>
+  <button class="bbf-ghost" id="bbf-latest" type="button">Latest</button>
+</div>
+<div class="bbf-status" id="bbf-status" role="status"><strong>Loading the latest flight&hellip;</strong><p>Fetching the balloon&rsquo;s readings.</p></div>
+<div id="bbf-content" class="bbf-content" hidden>
+  <div class="bbf-controls">
+    <button class="bbf-btn" id="bbf-play" type="button">Play the flight</button>
+    <div class="bbf-seg" role="group" aria-label="How much of the flight to show">
+      <button type="button" id="bbf-scale-all" aria-pressed="true">Whole flight</button>
+      <button type="button" id="bbf-scale-wx" aria-pressed="false">Where weather happens</button>
+    </div>
+    <div class="bbf-seg" role="group" aria-label="Units">
+      <button type="button" id="bbf-unit-us" aria-pressed="true">&deg;F, mph, feet</button>
+      <button type="button" id="bbf-unit-si" aria-pressed="false">&deg;C, km/h, km</button>
+    </div>
+  </div>
+  <div class="bbf-flight">
+    <div class="bbf-chartbox"><svg id="bbf-chart" role="img" aria-label="Height on the vertical axis, with the balloon&rsquo;s position, temperature and wind speed at each height"></svg></div>
+    <div class="bbf-readout">
+      <div><div class="bbf-big" id="bbf-r-h"></div><div class="bbf-sub" id="bbf-r-sub"></div></div>
+      <dl class="bbf-stats">
+        <div><dt><span class="bbf-key" style="background:var(--temp)"></span>Temperature</dt><dd id="bbf-r-t"></dd></div>
+        <div><dt><span class="bbf-key" style="background:var(--wind)"></span>Wind</dt><dd id="bbf-r-w"></dd></div>
+        <div><dt>Humidity</dt><dd id="bbf-r-rh"></dd></div>
+        <div><dt>Air pressure</dt><dd id="bbf-r-p"></dd></div>
+      </dl>
+      <p class="bbf-say" id="bbf-r-say"></p>
+      <div class="bbf-slider"><label for="bbf-height">Move the balloon up or down</label><input type="range" id="bbf-height" min="0" max="35000" step="10" value="0"></div>
+    </div>
+  </div>
+  <div class="bbf-sec"><h3>What this flight found</h3><ul class="bbf-finds" id="bbf-finds"></ul></div>
+  <div class="bbf-sec" id="bbf-mapsec"><h3>Where the wind carried it</h3><p class="bbf-cap" id="bbf-mapcap"></p><div class="bbf-mapbox"><svg id="bbf-map" role="img" aria-label="Estimated path of the balloon over western New York"></svg></div></div>
+  <details><summary>See the numbers as a table</summary><div class="bbf-tablewrap" id="bbf-tblwrap"></div></details>
+</div>`;
+var bbfT=document.createElement("ta"+"ble");bbfT.id="bbf-tbl";document.getElementById("bbf-tblwrap").appendChild(bbfT);
+/* ---------- analysis: pure functions over one sounding ---------- */
+const KT=0.514444, CLIMB=5, LAT0=42.9401, LON0=-78.7246;
+const es=t=>6.112*Math.exp(17.62*t/(243.12+t)), ei=t=>6.112*Math.exp(22.46*t/(272.62+t));
+function lerpSeries(S,z,key){
+  if(!S.length||z<S[0].z-1||z>S[S.length-1].z+1) return null;
+  let lo=0,hi=S.length-1; if(z<=S[0].z) return S[0][key]; if(z>=S[hi].z) return S[hi][key];
+  while(hi-lo>1){const m=(lo+hi)>>1; if(S[m].z<=z) lo=m; else hi=m;}
+  const a=S[lo],b=S[hi],f=(z-a.z)/(b.z-a.z||1); return a[key]+(b[key]-a[key])*f;
+}
+function analyze(prof){
+  const lv=prof.filter(l=>l.hght!=null&&l.pres!=null).sort((a,b)=>a.hght-b.hght);
+  const withT=lv.filter(l=>l.tmpc!=null); if(withT.length<5) return null;
+  const sfc=withT.reduce((a,b)=>b.pres>a.pres?b:a).hght;
+  const T=[],Wn=[],P=[];
+  lv.forEach(l=>{ if(l.hght<sfc) return;
+    if(P.length&&l.hght<=P[P.length-1].z) return;
+    P.push({z:l.hght,lp:Math.log(l.pres)});
+    if(l.tmpc!=null){const td=l.dwpc; let rh=null,rhi=null;
+      if(td!=null){rh=Math.min(100,100*es(td)/es(l.tmpc)); rhi=100*es(td)/ei(l.tmpc);}
+      T.push({z:l.hght,t:l.tmpc,td,rh,rhi,sat:td!=null&&(l.tmpc>=-20?(l.tmpc-td)<=0.8:rhi>=98)});}
+    if(l.sknt!=null&&l.drct!=null){const ws=l.sknt*KT,r=l.drct*Math.PI/180; Wn.push({z:l.hght,ws,wd:l.drct,u:-ws*Math.sin(r),v:-ws*Math.cos(r)});}
+  });
+  const top=T[T.length-1].z, p0=Math.exp(P[0].lp);
+  // saturated (cloud-likely) layers
+  const clouds=[]; let cur=null;
+  const raw=[];
+  T.forEach(l=>{ if(l.sat){ if(cur) cur.top=l.z; else cur={base:l.z,top:l.z}; } else if(cur){raw.push(cur);cur=null;} });
+  if(cur) raw.push(cur);
+  raw.forEach(c=>{ const p=clouds[clouds.length-1]; if(p&&c.base-p.top<300) p.top=c.top; else clouds.push(c); });
+  clouds.forEach(c=>{ c.ice=c.base>=6000&&lerpSeries(T,c.base,'t')<-20; });
+  // strongest temperature inversion below 6 km
+  let inv=null,run=null;
+  for(let i=1;i<T.length&&T[i-1].z<6000;i++){
+    if(T[i].t>T[i-1].t){ if(!run) run={a:T[i-1],b:T[i]}; else run.b=T[i]; }
+    else if(run){ if(!inv||run.b.t-run.a.t>inv.b.t-inv.a.t) inv=run; run=null; }
+  }
+  if(run&&(!inv||run.b.t-run.a.t>inv.b.t-inv.a.t)) inv=run;
+  if(inv&&inv.b.t-inv.a.t<1) inv=null;
+  // freezing-level crossings (interpolated)
+  const cross=[];
+  for(let i=1;i<T.length;i++){const a=T[i-1],b=T[i]; if((a.t>0)!==(b.t>0)) cross.push({z:a.z+(0-a.t)/(b.t-a.t)*(b.z-a.z),down:a.t>0}); }
+  const maxW=Wn.length?Wn.reduce((a,b)=>b.ws>a.ws?b:a):null;
+  const cold=T.reduce((a,b)=>b.t<a.t?b:a);
+  // estimated drift: integrate the wind while climbing at CLIMB m/s
+  const path=[]; let x=0,y=0;
+  if(Wn.length>3){ const wtop=Wn[Wn.length-1].z;
+    for(let z=sfc;z<=Math.min(top,wtop);z+=100){ path.push({z,x,y});
+      const u=lerpSeries(Wn,Math.max(z,Wn[0].z),'u'),v=lerpSeries(Wn,Math.max(z,Wn[0].z),'v'); x+=u*100/CLIMB/1000; y+=v*100/CLIMB/1000; } }
+  const drift=path.length?{km:Math.hypot(x,y),bearing:(Math.atan2(x,y)*180/Math.PI+360)%360,x,y}:null;
+  return {T,Wn,P,sfc,top,p0,clouds,inv,cross,maxW,cold,path,drift,sfcT:T[0]};
+}
+/* ---------- page ---------- */
+const API='https://mesonet.agron.iastate.edu/json/raob.py?station=KBUF&ts=';
+const TZ='America/New_York';
+const $=id=>document.getElementById('bbf-'+id), NS='http://www.w3.org/2000/svg';
+let F=null, valid=null, us=true, whole=true, cur=0, playing=null, G={}, M={};
+const cache=new Map();
+const nf=(n,d=0)=>n.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
+const minus=s=>String(s).replace('-','−');
+const fT=c=>minus(us?nf(c*9/5+32)+'°F':nf(c)+'°C');
+const fS=m=>us?nf(m*2.23694)+' mph':nf(m*3.6)+' km/h';
+const fH=z=>us?nf(Math.round(z*3.28084/100)*100)+' ft':nf(z/1000,1)+' km';
+const fHx=z=>us?nf(Math.round(z*3.28084/10)*10)+' ft':nf(Math.round(z/10)*10)+' m';
+const fD=km=>us?nf(km*0.621371)+' miles':nf(km)+' km';
+const DIRS=['north','north-northeast','northeast','east-northeast','east','east-southeast','southeast','south-southeast','south','south-southwest','southwest','west-southwest','west','west-northwest','northwest','north-northwest'];
+const dirName=d=>DIRS[Math.round(d/22.5)%16];
+function at(z){
+  z=Math.max(F.sfc,Math.min(F.top,z));
+  const t=lerpSeries(F.T,z,'t'), lp=lerpSeries(F.P,z,'lp');
+  const withTd=F.T.filter(l=>l.rh!=null);
+  const rh=lerpSeries(withTd,z,'rh'), rhi=lerpSeries(withTd,z,'rhi');
+  const u=lerpSeries(F.Wn,z,'u'), v=lerpSeries(F.Wn,z,'v');
+  const ws=u==null?null:Math.hypot(u,v), wd=u==null?null:(Math.atan2(-u,-v)*180/Math.PI+360)%360;
+  const cloud=F.clouds.find(c=>z>=c.base-30&&z<=c.top+30);
+  return {z,t,p:Math.exp(lp),rh,rhi,ws,wd,cloud,sec:(z-F.sfc)/CLIMB};
+}
+function humid(o){
+  if(o.rh==null) return ['No reading',''];
+  if(o.cloud) return [nf(o.rh)+'%',o.cloud.ice?'ice cloud likely':'saturated: cloud likely'];
+  if(o.rh>=75) return [nf(o.rh)+'%','humid'];
+  if(o.rh>=40) return [nf(o.rh)+'%','moderate'];
+  if(o.rh>=15) return [nf(o.rh)+'%','dry'];
+  return [nf(o.rh)+'%','very dry'];
+}
+function say(o){
+  const z=o.z, inv=F.inv, mw=F.maxW;
+  if(o.cloud) return o.cloud.ice
+    ? 'Cold, moist air where thin, wispy ice clouds are likely. This is the height of the high streaky clouds you see on fair days.'
+    : 'Inside a likely cloud layer. The air is holding nearly all the water it can, so droplets form.';
+  if(inv&&z>=inv.a.z&&z<=inv.b.z+400) return inv.a.z<=F.sfc+50
+    ? 'A pool of cold air at the ground. It is colder down here than a little higher up, which is common on calm, clear nights and traps air near the surface.'
+    : 'A lid. The air gets warmer with height here instead of colder. Cooler air below cannot rise through it, so clouds and haze stay trapped underneath.';
+  if(z>=Math.max(F.cold.z,20000)||z>=24000) return 'Near the top of the flight. The air here is warmed by the ozone layer absorbing sunlight, and almost all of the atmosphere is below you.';
+  if(mw&&mw.ws>=30&&o.ws!=null&&o.ws>=0.8*mw.ws&&z>6000) return 'The jet stream, a river of fast-moving air. Airliners cruise near this height, which is why flights heading east are usually quicker than flights heading west.';
+  if(z>=14000) return 'Above the weather. The temperature has stopped falling steadily and there is almost no moisture.';
+  if(o.t<=0) return 'Below freezing here. '+(F.sfcT.t>0?'Cloud and precipitation at this height are mostly ice and snow, whatever the season.':'')+(o.rh!=null&&o.rh<25?' The air is very dry.':'');
+  return 'Above freezing. The air '+(o.rh==null?'cools as you climb.':o.rh>=75?'is humid.':o.rh<25?'is very dry.':'cools steadily as you climb.');
+}
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+function marks(){
+  const m=[]; const lowc=F.clouds.filter(c=>!c.ice&&c.base<6000); const c=lowc.length?lowc.reduce((a,b)=>(b.top-b.base)>(a.top-a.base)?b:a):null;
+  if(c) m.push({z:(c.base+c.top)/2,name:'Clouds'});
+  const fr=F.cross.find(x=>x.down); if(fr&&F.sfcT.t>0) m.push({z:fr.z,name:'Freezing'});
+  if(F.maxW) m.push({z:F.maxW.z,name:F.maxW.ws>=30?'Jet stream':'Fastest wind'});
+  m.push({z:F.top,name:'Last reading'});
+  if(F.cold.z<F.top-1500) m.push({z:F.cold.z,name:'Coldest'});
+  m.push({z:8849,name:'Everest'});
+  const ic=F.clouds.find(c=>c.ice); if(ic) m.push({z:(ic.base+ic.top)/2,name:'Ice cloud'});
+  return m;
+}
+function draw(){
+  const svg=$('chart'); svg.innerHTML='';
+  const W=Math.max(280,svg.parentNode.clientWidth-24), narrow=W<520, H=narrow?500:620;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.setAttribute('height',H);
+  const top=30,bot=H-34,gl=us?52:42,gap=narrow?10:18;
+  const sw=narrow?112:176, pw=(W-gl-sw-gap*2-6)/2, tx0=gl+sw+gap, wx0=tx0+pw+gap;
+  const zfull=Math.max(35000,Math.ceil(F.top/5000)*5000), zmax=whole?zfull:13000;
+  const y=z=>bot-(z/zmax)*(bot-top);
+  const tmin=Math.floor(Math.min(...F.T.map(l=>l.t))/10)*10-2, tmax=Math.ceil(Math.max(...F.T.map(l=>l.t))/10)*10+2;
+  const wmax=Math.max(72,F.maxW?Math.ceil(F.maxW.ws/10)*10+4:72);
+  const xT=c=>tx0+(c-tmin)/(tmax-tmin)*pw, xW=m=>wx0+m/wmax*pw;
+  G={top,bot,zmax,y,xT,xW,W,gl,sw,tx0,wx0,pw};
+  const defs=el('defs',{},svg);
+  const lg=el('linearGradient',{id:'bbf-sky',gradientUnits:'userSpaceOnUse',x1:0,x2:0,y1:y(0),y2:y(35000)},defs);
+  [[0,'#B4DAF7'],[.34,'#4A80C8'],[.63,'#1E3577'],[1,'#0A0F2C']].forEach(s=>el('stop',{offset:s[0],'stop-color':s[1]},lg));
+  el('rect',{x:gl,y:top,width:W-gl,height:bot-top},el('clipPath',{id:'bbf-clip'},defs));
+  const step=us?(whole?20000:10000)/3.28084:(whole?5000:2000);
+  for(let z=0;z<=zmax+1;z+=step){
+    el('line',{x1:gl,x2:W-2,y1:y(z),y2:y(z),stroke:'var(--grid)','stroke-width':1},svg);
+    el('text',{x:gl-8,y:y(z)+4,'text-anchor':'end','font-size':11,fill:'var(--muted)'},svg,us?nf(Math.round(z*3.28084)):nf(z/1000));
+  }
+  el('text',{x:gl-8,y:14,'text-anchor':'end','font-size':11,'font-weight':600,fill:'var(--muted)'},svg,us?'feet':'km');
+  const title=(x,t)=>el('text',{x,y:14,'font-size':12,'font-weight':600,fill:'var(--ink)'},svg,t);
+  title(gl,'Height'); title(tx0,'Temperature'); title(wx0,'Wind speed');
+  const g=el('g',{'clip-path':'url(#bbf-clip)'},svg), stripW=30;
+  el('rect',{x:gl,y:top,width:stripW,height:bot-top,rx:6,fill:'url(#bbf-sky)'},g);
+  F.clouds.forEach(c=>{const h=Math.max(5,y(c.base)-y(c.top));el('rect',{x:gl+3,y:(y(c.base)+y(c.top))/2-h/2,width:stripW-6,height:h,rx:2.5,fill:'#FFFFFF','fill-opacity':c.ice?.5:.95},g);});
+  const used=[];
+  marks().forEach(m=>{ if(m.z>zmax||m.z<0) return; const yy=y(m.z);
+    if(used.some(u=>Math.abs(u-yy)<15)) return; used.push(yy);
+    el('line',{x1:gl+stripW+3,x2:gl+stripW+11,y1:yy,y2:yy,stroke:'var(--muted)','stroke-width':1},svg);
+    el('text',{x:gl+stripW+15,y:Math.max(top+9,yy+4),'font-size':narrow?11:12.5,fill:'var(--ink)'},svg,m.name);
+  });
+  const inDom=(c)=>c>=tmin&&c<=tmax;
+  const tticks=(us?(pw<130?[-80,32]:[-120,-80,-40,0,32,80]):(pw<130?[-60,0]:[-80,-60,-40,-20,0,20,40]));
+  tticks.forEach(v=>{const c=us?(v-32)*5/9:v; if(!inDom(c)) return; const x=xT(c), frz=Math.abs(c)<.01;
+    el('line',{x1:x,x2:x,y1:top,y2:bot,stroke:frz?'var(--muted)':'var(--grid)','stroke-width':1,'stroke-dasharray':frz?'3 4':'none'},svg);
+    el('text',{x,y:bot+16,'text-anchor':'middle','font-size':11,fill:'var(--muted)'},svg,minus(v+'°'));
+  });
+  if(inDom(0)) el('text',{x:xT(0),y:bot+29,'text-anchor':'middle','font-size':10,fill:'var(--muted)'},svg,'freezing');
+  const line=(S,fx,key)=>S.map((r,i)=>(i?'L':'M')+fx(r[key]).toFixed(1)+' '+y(r.z).toFixed(1)).join('');
+  el('path',{d:line(F.T,xT,'t'),fill:'none',stroke:'var(--temp)','stroke-width':2,'stroke-linejoin':'round','clip-path':'url(#bbf-clip)'},svg);
+  const wstep=us?50:100, wtop=us?wmax*2.23694:wmax*3.6;
+  for(let v=0;v<=wtop;v+=(pw<130?wstep*2:wstep)){const x=xW(us?v/2.23694:v/3.6);
+    el('line',{x1:x,x2:x,y1:top,y2:bot,stroke:'var(--grid)','stroke-width':1},svg);
+    el('text',{x,y:bot+16,'text-anchor':'middle','font-size':11,fill:'var(--muted)'},svg,v);
+  }
+  el('text',{x:wx0+pw/2,y:bot+29,'text-anchor':'middle','font-size':10,fill:'var(--muted)'},svg,us?'mph':'km/h');
+  if(F.Wn.length>1){ const wl=line(F.Wn,xW,'ws');
+    el('path',{d:wl+'L'+xW(0)+' '+y(F.Wn[F.Wn.length-1].z)+'L'+xW(0)+' '+y(F.Wn[0].z)+'Z',fill:'var(--wind)','fill-opacity':.13,stroke:'none','clip-path':'url(#bbf-clip)'},svg);
+    el('path',{d:wl,fill:'none',stroke:'var(--wind)','stroke-width':2,'stroke-linejoin':'round','clip-path':'url(#bbf-clip)'},svg); }
+  const c=el('g',{id:'bbf-cursor'},svg);
+  G.line=el('line',{x1:tx0-8,x2:W-2,stroke:'var(--ink)','stroke-width':1},c);
+  G.string=el('line',{stroke:'#12233B','stroke-width':1},c);
+  G.box=el('rect',{width:6,height:5,fill:'#FFFFFF',stroke:'#12233B','stroke-width':1},c);
+  G.bal=el('circle',{r:9,fill:'#FFFFFF',stroke:'#12233B','stroke-width':1.5},c);
+  G.dT=el('circle',{r:5,fill:'var(--temp)',stroke:'var(--surface)','stroke-width':2},c);
+  G.dW=el('circle',{r:5,fill:'var(--wind)',stroke:'var(--surface)','stroke-width':2},c);
+  const lab=()=>el('text',{'font-size':12,'font-weight':600,fill:'var(--ink)',stroke:'var(--surface)','stroke-width':4,'paint-order':'stroke','stroke-linejoin':'round'},c);
+  G.lT=lab(); G.lW=lab();
+  place();
+}
+function place(){
+  if(!G.y||!F) return;
+  const o=at(cur), yy=Math.max(G.top,G.y(Math.min(cur,G.zmax)));
+  $('cursor').setAttribute('opacity',cur<=G.zmax?1:0);
+  G.line.setAttribute('y1',yy); G.line.setAttribute('y2',yy);
+  const bx=G.gl+15; G.bal.setAttribute('cx',bx); G.bal.setAttribute('cy',yy);
+  G.string.setAttribute('x1',bx);G.string.setAttribute('x2',bx);G.string.setAttribute('y1',yy+9);G.string.setAttribute('y2',yy+16);
+  G.box.setAttribute('x',bx-3);G.box.setAttribute('y',yy+16);
+  const put=(dot,lbl,val,x,txt,x0)=>{ const show=val!=null; dot.setAttribute('opacity',show?1:0); lbl.setAttribute('opacity',show?1:0); if(!show) return;
+    dot.setAttribute('cx',x);dot.setAttribute('cy',yy);
+    const right=x<x0+G.pw*0.55; lbl.textContent=txt; lbl.setAttribute('x',right?x+9:x-9);
+    lbl.setAttribute('text-anchor',right?'start':'end'); lbl.setAttribute('y',yy<G.top+22?yy+17:yy-8);};
+  put(G.dT,G.lT,o.t,G.xT(o.t),fT(o.t),G.tx0);
+  put(G.dW,G.lW,o.ws,o.ws==null?0:G.xW(o.ws),o.ws==null?'':fS(o.ws),G.wx0);
+}
+function readout(){
+  const o=at(cur);
+  $('r-h').textContent=fH(o.z);
+  const mins=Math.round(o.sec/60);
+  $('r-sub').textContent=(us?nf(o.z/1609.344,1)+' miles up':nf(Math.round(o.z*3.28084/100)*100)+' ft')+' · '+(mins<1?'just launched':'about '+mins+' min after launch');
+  $('r-t').textContent=fT(o.t);
+  $('r-w').innerHTML=o.ws==null?'No reading':fS(o.ws)+'<small>from the '+dirName(o.wd)+'</small>';
+  const h=humid(o); $('r-rh').innerHTML=h[0]+'<small>'+h[1]+'</small>';
+  const pr=o.p/F.p0*100; $('r-p').innerHTML=(pr<10?nf(pr,1):nf(pr))+'%<small>of ground level</small>';
+  $('r-say').textContent=say(o);
+  $('height').value=Math.round(o.z);
+  placeMap(o.z);
+}
+function setZ(z,keep){ if(!keep) stop(); cur=Math.max(F.sfc,Math.min(F.top,z)); if(cur>G.zmax&&!whole){whole=true;press();draw();} place(); readout(); }
+function findings(){
+  const L=[], sT=F.sfcT, down=F.cross.find(x=>x.down);
+  const low=F.clouds.filter(c=>!c.ice&&c.base<6000);
+  const c=low.length?low.reduce((a,b)=>(b.top-b.base)>(a.top-a.base)?b:a):null;
+  if(c){ const thick=c.top-c.base;
+    L.push([(c.base+c.top)/2, thick<60?'A likely cloud layer near '+fH(c.base):'Likely cloud from '+fH(c.base)+' to '+fH(c.top),
+      (c.base<=F.sfc+60?'The air is nearly saturated right from the ground, which often means fog, mist or low cloud at the airport. ':'The air is nearly saturated here, so cloud is likely. ')+(thick>=60?'The layer is about '+fHx(thick)+' deep.':'It looks like a thin layer.')]);
+  } else L.push([F.sfc,'No low or mid-level cloud layer','Nowhere in the lower part of the flight was the air close to saturated. Skies were probably clear or had only high, thin cloud.']);
+  if(F.inv){ const a=F.inv.a,b=F.inv.b, hum=(a.rh!=null&&b.rh!=null)?' Humidity goes from '+nf(a.rh)+'% to '+nf(b.rh)+'%.':'';
+    if(a.z<=F.sfc+50) L.push([b.z,'Cold air pooled at the ground','It is '+fT(a.t)+' at the airport but '+fT(b.t)+' at '+fH(b.z)+'. Colder air is heavier, so it sits at the surface and traps fog, smoke and haze under it. This is common around sunrise and after calm, clear nights.']);
+    else L.push([b.z,'A lid at '+fH(a.z),'Between '+fH(a.z)+' and '+fH(b.z)+' the temperature rises from '+fT(a.t)+' to '+fT(b.t)+' instead of falling.'+hum+' Cooler air cannot rise through warmer air, so clouds below stay shallow. In winter the same kind of lid decides how deep lake-effect snow clouds can grow.']);
+  }
+  if(sT.t>0&&down) L.push([down.z,'Freezing begins at '+fH(down.z),'It was '+fT(sT.t)+' at the airport, but the air reaches freezing '+(us?nf(down.z/1609.344,1)+' miles':nf(down.z/1000,1)+' km')+' up. Above this height, cloud and precipitation are mostly ice and snow, in any season.']);
+  else if(sT.t<=0){ const up=F.cross.find(x=>!x.down), dn=up&&F.cross.find(x=>x.down&&x.z>up.z);
+    if(up&&dn) L.push([(up.z+dn.z)/2,'Warm air above a freezing surface','It is '+fT(sT.t)+' at the airport, but a layer between '+fH(up.z)+' and '+fH(dn.z)+' is above freezing. Snow falling through a warm layer melts, then refreezes on the way down or on contact. This is the setup for sleet and freezing rain.']);
+    else L.push([F.sfc,'Below freezing all the way up','It is '+fT(sT.t)+' at the airport and the air only gets colder with height. Anything that falls from this air is snow.']);
+  }
+  if(F.maxW){ const m=F.maxW;
+    L.push([m.z,(m.ws>=30?'A '+fS(m.ws)+' jet stream at ':'Fastest wind: '+fS(m.ws)+' at ')+fH(m.z),'The strongest wind of the flight, blowing from the '+dirName(m.wd)+'. The air there is '+fT(lerpSeries(F.T,m.z,'t')??F.cold.t)+'.'+(m.ws>=30&&m.z>7000?' Airliners cruise near this height.':'')]); }
+  if(F.cold.z<F.top-1500) L.push([F.cold.z,'The coldest air is not at the top','The lowest temperature, '+fT(F.cold.t)+', is at '+fH(F.cold.z)+'. Higher up the air warms again, because the ozone layer absorbs sunlight.']);
+  else L.push([F.cold.z,'Coldest reading: '+fT(F.cold.t),'The lowest temperature of the flight, at '+fH(F.cold.z)+'.']);
+  const pt=Math.exp(lerpSeries(F.P,F.top,'lp'))/F.p0*100;
+  L.push([F.top,'Last reading '+(us?nf(F.top/1609.344,1)+' miles':nf(F.top/1000,1)+' km')+' up','At '+fH(F.top)+', '+nf(100-pt,1)+'% of the atmosphere was below the balloon.'+(F.top>25000?' Weather balloons burst at about this height and the instrument falls back under a small parachute.':' This flight ended lower than usual; most balloons reach about '+(us?'100,000 ft':'30 km')+' before they burst.')]);
+  $('finds').innerHTML='';
+  L.forEach(f=>{const li=document.createElement('li');
+    li.innerHTML='<h4></h4><p></p><button class="bbf-link" type="button">Take the balloon there</button>';
+    li.children[0].textContent=f[1]; li.children[1].textContent=f[2];
+    li.children[2].addEventListener('click',()=>{ const wantWx=f[0]<6000; if(wantWx===whole){whole=!wantWx;press();draw();} setZ(f[0]); $('chart').scrollIntoView({behavior:'smooth',block:'nearest'}); });
+    $('finds').appendChild(li);});
+}
+const CITIES=[[-78.7246,42.9401,'Buffalo airport',1],[-78.188,42.998,'Batavia'],[-77.615,43.157,'Rochester'],[-79.057,43.094,'Niagara Falls'],[-76.147,43.048,'Syracuse'],[-79.235,42.097,'Jamestown'],[-80.085,42.129,'Erie'],[-79.383,43.653,'Toronto'],[-77.054,42.869,'Geneva'],[-76.502,42.444,'Ithaca'],[-78.430,42.078,'Olean'],[-75.911,43.975,'Watertown'],[-79.333,42.480,'Dunkirk']];
+function drawMap(){
+  const sec=$('mapsec'); if(!F.drift){sec.hidden=true;M={};return;} sec.hidden=false;
+  const svg=$('map'); svg.innerHTML='';
+  const W=Math.max(280,svg.parentNode.clientWidth-24), small=W<520;
+  const xs=F.path.map(p=>p.x), ys=F.path.map(p=>p.y);
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const wk=Math.max(x1-x0,60), hk=Math.max(y1-y0,24), cx=(x0+x1)/2, cy=(y0+y1)/2;
+  const s=Math.min((W-(small?70:150))/wk,(small?200:300)/hk), H=Math.round(hk*s+90);
+  svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.setAttribute('height',H);
+  const X=x=>W/2+(x-cx)*s, Y=y=>H/2-(y-cy)*s; M={X,Y};
+  const kx=111.32*Math.cos(LAT0*Math.PI/180);
+  el('path',{d:F.path.map((p,i)=>(i?'L':'M')+X(p.x).toFixed(1)+' '+Y(p.y).toFixed(1)).join(''),fill:'none',stroke:'var(--accent)','stroke-width':2,'stroke-linejoin':'round','stroke-dasharray':'6 4'},svg);
+  CITIES.forEach(c=>{ const px=X((c[0]-LON0)*kx), py=Y((c[1]-LAT0)*111.32);
+    if(px<24||px>W-24||py<22||py>H-26) return;
+    el('circle',{cx:px,cy:py,r:c[3]?5:3.5,fill:c[3]?'var(--ink)':'var(--muted)',stroke:'var(--surface)','stroke-width':2},svg);
+    el('text',{x:px,y:py-10,'text-anchor':c[3]?(px>W-120?'end':'start'):'middle','font-size':small?11:12.5,fill:'var(--ink)','font-weight':c[3]?600:400,stroke:'var(--surface)','stroke-width':4,'paint-order':'stroke'},svg,c[2]);
+  });
+  const e=F.path[F.path.length-1];
+  el('circle',{cx:X(e.x),cy:Y(e.y),r:5,fill:'var(--surface)',stroke:'var(--ink)','stroke-width':2},svg);
+  el('text',{x:X(e.x),y:Y(e.y)+20,'text-anchor':X(e.x)>W/2?'end':'start','font-size':small?11:12.5,'font-weight':600,fill:'var(--ink)',stroke:'var(--surface)','stroke-width':4,'paint-order':'stroke'},svg,'Last wind reading');
+  const km=us?32.1869:25, len=km*s;
+  el('line',{x1:12,x2:12+len,y1:H-12,y2:H-12,stroke:'var(--muted)','stroke-width':2},svg);
+  el('text',{x:18+len,y:H-8,'font-size':11,fill:'var(--muted)'},svg,us?'20 miles':'25 km');
+  M.dot=el('circle',{r:7,fill:'#FFFFFF',stroke:'#12233B','stroke-width':1.5},svg);
+  placeMap(cur);
+  const mins=Math.round((e.z-F.sfc)/CLIMB/60);
+  $('mapcap').textContent='While the balloon climbed, the wind pushed it sideways. Over roughly '+(mins>=90?Math.floor(mins/60)+' hour'+(mins>=120?'s ':' ')+(mins%60)+' minutes':mins+' minutes')+' it drifted an estimated '+fD(F.drift.km)+' to the '+dirName(F.drift.bearing)+'. The dashed path is worked out from the winds it measured, not tracked by GPS.';
+}
+function placeMap(z){ if(!M.dot) return; const P=F.path; let i=Math.min(P.length-1,Math.max(0,Math.round((z-F.sfc)/100))); M.dot.setAttribute('cx',M.X(P[i].x)); M.dot.setAttribute('cy',M.Y(P[i].y)); }
+function table(){
+  const zs=[F.sfc,1000,2000,3000,4000,6000,8000,10000,12000,14000,16000,20000,25000,30000,F.top].filter((z,i,a)=>z>=F.sfc&&z<=F.top&&(i===0||z>a[0]+200));
+  let h='<thead><tr><th>Height</th><th>Temperature</th><th>Wind</th><th>From</th><th>Humidity</th><th>Pressure vs ground</th></tr></thead><tbody>';
+  zs.forEach(z=>{const o=at(z);h+='<tr><td>'+fH(z)+'</td><td>'+fT(o.t)+'</td><td>'+(o.ws==null?'–':fS(o.ws))+'</td><td>'+(o.wd==null?'–':dirName(o.wd))+'</td><td>'+(o.rh==null?'–':nf(o.rh)+'%')+'</td><td>'+nf(o.p/F.p0*100,1)+'%</td></tr>';});
+  $('tbl').innerHTML=h+'</tbody>';
+}
+function press(){
+  $('scale-all').setAttribute('aria-pressed',whole);$('scale-wx').setAttribute('aria-pressed',!whole);
+  $('unit-us').setAttribute('aria-pressed',us);$('unit-si').setAttribute('aria-pressed',!us);
+}
+function renderAll(){press();draw();readout();findings();drawMap();table();}
+/* ---------- which flight ---------- */
+const HALF=12*3600e3;
+const latestSlot=()=>new Date(Math.floor(Date.now()/HALF)*HALF);
+const key=d=>d.toISOString().slice(0,13).replace(/[-T]/g,'');
+const launch=d=>new Date(d.getTime()-3600e3);                       // balloons go up about an hour before the nominal time
+const localParts=d=>{const p={};new Intl.DateTimeFormat('en-US',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'numeric',hour12:false}).formatToParts(d).forEach(x=>p[x.type]=x.value);return p;};
+function describe(d){
+  const l=launch(d), day=new Intl.DateTimeFormat('en-US',{timeZone:TZ,weekday:'long',month:'long',day:'numeric',year:'numeric'}).format(l);
+  const hr=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour:'numeric'}).format(l);
+  return {day,hr,slot:d.getUTCHours()===12?'morning':'evening'};
+}
+function syncPicker(){
+  const p=localParts(launch(valid)); $('date').value=p.year+'-'+p.month+'-'+p.day;
+  $('slot').value=valid.getUTCHours()===12?'am':'pm';
+  $('next').disabled=valid.getTime()+HALF>latestSlot().getTime();
+  const d=describe(valid);
+  $('when').textContent=d.day+' · '+d.slot+' launch, about '+d.hr;
+}
+function status(title,msg){ $('content').hidden=true; const s=$('status'); s.hidden=false; s.innerHTML='<strong></strong><p></p>'; s.children[0].textContent=title; s.children[1].textContent=msg; }
+async function fetchFlight(d){
+  const k=key(d); if(cache.has(k)) return cache.get(k);
+  const r=await fetch(API+encodeURIComponent(d.toISOString().slice(0,19)+'Z')); if(!r.ok) throw new Error('HTTP '+r.status);
+  const j=await r.json(); const p=j.profiles&&j.profiles[0]; const f=p?analyze(p.profile):null; cache.set(k,f); return f;
+}
+let reqId=0;
+async function load(d,fallback){
+  stop(); const id=++reqId; valid=d; syncPicker(); status('Loading the flight…','Fetching the balloon’s readings.');
+  try{
+    let f=await fetchFlight(d), tries=0;
+    while(!f&&fallback&&tries<6){ d=new Date(d.getTime()-HALF); tries++; f=await fetchFlight(d); }
+    if(id!==reqId) return; valid=d; syncPicker();
+    if(!f){ status('No readings for this launch','Either the balloon was not launched, or its data has not arrived yet. Readings usually appear a couple of hours after launch. Try an earlier flight.'); return; }
+    F=f; history.replaceState(null,'','#'+key(valid));
+    $('status').hidden=true; $('content').hidden=false;
+    $('height').min=Math.round(F.sfc); $('height').max=Math.round(F.top);
+    cur=F.maxW&&F.maxW.z>3000?F.maxW.z:(F.sfc+F.top)/2; whole=true;
+    renderAll();
+  }catch(e){ if(id===reqId) status('Could not reach the data service','The sounding archive did not respond. Check your connection and try again in a minute.'); }
+}
+function fromPicker(){ const v=$('date').value; if(!v) return; const [y,m,dd]=v.split('-').map(Number);
+  load($('slot').value==='am'?new Date(Date.UTC(y,m-1,dd,12)):new Date(Date.UTC(y,m-1,dd+1,0)),false); }
+/* ---------- interaction ---------- */
+function zFromEvent(e){const r=$('chart').getBoundingClientRect();const py=(e.clientY-r.top)*((G.bot+34)/r.height);return (G.bot-py)/(G.bot-G.top)*G.zmax;}
+let drag=false;
+$('chart').addEventListener('pointerdown',e=>{setZ(zFromEvent(e)); if(e.pointerType==='mouse'){drag=true;$('chart').setPointerCapture(e.pointerId);}});
+$('chart').addEventListener('pointermove',e=>{if(drag) setZ(zFromEvent(e));});
+['pointerup','pointercancel'].forEach(t=>$('chart').addEventListener(t,()=>{drag=false;}));
+$('height').addEventListener('input',e=>setZ(+e.target.value));
+$('scale-all').addEventListener('click',()=>{whole=true;press();draw();});
+$('scale-wx').addEventListener('click',()=>{whole=false;if(cur>13000)cur=Math.min(12000,F.top);press();draw();readout();});
+$('unit-us').addEventListener('click',()=>{us=true;renderAll();});
+$('unit-si').addEventListener('click',()=>{us=false;renderAll();});
+function stop(){ if(playing){cancelAnimationFrame(playing);playing=null;$('play').textContent='Play the flight';} }
+$('play').addEventListener('click',()=>{
+  if(playing){stop();return;}
+  if(!whole){whole=true;press();draw();}
+  const t0=performance.now(),dur=16000; $('play').textContent='Stop';
+  const tick=now=>{const f=Math.min(1,(now-t0)/dur); setZ(F.sfc+(F.top-F.sfc)*f,true); if(f<1) playing=requestAnimationFrame(tick); else stop();};
+  playing=requestAnimationFrame(tick);
+});
+$('prev').addEventListener('click',()=>load(new Date(valid.getTime()-HALF),false));
+$('next').addEventListener('click',()=>load(new Date(valid.getTime()+HALF),false));
+$('latest').addEventListener('click',()=>load(latestSlot(),true));
+$('date').addEventListener('change',fromPicker); $('slot').addEventListener('change',fromPicker);
+let rt; window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(F&&!$('content').hidden){draw();drawMap();}},120);});
+const h=location.hash.match(/^#(\d{4})(\d{2})(\d{2})(00|12)$/);
+if(h) load(new Date(Date.UTC(+h[1],+h[2]-1,+h[3],+h[4])),false); else load(latestSlot(),true);
+})();
+</script>
