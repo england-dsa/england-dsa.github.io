@@ -1,52 +1,49 @@
 ---
-title: "Sales Performance Dashboard"
-description: "An interactive Power BI report tracking revenue, margin, and regional trends."
-date: 2026-09-15
-categories: [Power BI, DAX, Dashboard]
+title: "Buffalo Commute Hazard Outlook"
+description: "A self-updating dashboard that rates upcoming downtown Buffalo commutes for winter weather hazards, by corridor."
+date: 2026-10-02
+categories: [Python, Weather, Dashboard, API]
 image: thumbnail.png
 ---
 
-<!-- EDIT: this is a template project page. Replace the text and the embed. -->
+Will the drive into downtown be a problem tomorrow morning? This dashboard answers that one question for people who work in downtown Buffalo. It pulls the National Weather Service forecast every few hours and rates each weekday commute window, by direction of travel, as Low, Elevated, High, or Severe.
 
-## The question
+::: {.column-page-inset}
 
-What was the business problem? Who needed the answer, and what decision did it drive?
+{{< include _dashboard.html >}}
 
-## The dashboard
-
-::: {.embed-placeholder}
-**Your Power BI report goes here.**
-In Power BI: File → Embed report → Publish to web, copy the link, then replace this
-block with the embed below.
 :::
 
-<!-- Once you have a Publish to web link, delete the placeholder above and uncomment this:
+## How the rating works
 
-::: {.powerbi-embed}
-<iframe title="Sales Performance Dashboard" src="PASTE-YOUR-PUBLISH-TO-WEB-URL-HERE" allowfullscreen="true"></iframe>
-:::
+{{< include _method.html >}}
 
-No Publish to web access? Use a screenshot or GIF instead:
-![Dashboard overview](dashboard.png)
--->
+## Why by corridor
 
-## How I built it
+Lake effect snow is narrow. A band off Lake Erie can bury Orchard Park while downtown and Amherst see flurries, and a few hours later it can swing north. A single "Buffalo" forecast hides that, so each corridor is rated on the worst conditions at either end of the trip.
 
-- **Data**: where it came from and how you cleaned it (Power Query steps, joins).
-- **Model**: star schema, key relationships.
-- **Measures**: one or two DAX measures worth showing.
+## The data
 
-```dax
-Revenue YoY % =
-DIVIDE ( [Revenue] - [Revenue LY], [Revenue LY] )
-```
+All data comes from the [National Weather Service API](https://www.weather.gov/documentation/services-web-api), which is free and public. For each forecast point the script pulls:
 
-## What I found
+- snowfall and ice accumulation
+- wind gusts
+- "feels like" temperature
+- active winter weather alerts
 
-1. Finding one, with a number.
-2. Finding two, with a number.
-3. What you would recommend as a result.
+A Python script converts the forecast to hourly values, totals them for the morning (6 to 9 a.m.) and evening (4 to 7 p.m.) commute windows, applies the thresholds above, and writes the dashboard. GitHub Actions reruns it on a schedule, so the page stays current without anyone touching it.
 
-## Files
+## Limits
 
-[Download the .pbix](https://github.com/YOUR-USERNAME/YOUR-REPO)
+- **Lake effect bands are hard to place.** A shift of a few miles changes which corridor is hit, so treat the ratings as guidance.
+- **Snow and ice amounts are only forecast a few days ahead.** Later windows are rated on wind, cold, and alerts alone, and are marked.
+- **Travel bans and road closures are not included.** Those come from Erie County and the City of Buffalo.
+- **The thresholds are my own judgment**, informed by forecasting experience. They have not yet been tested against past storms.
+
+## What's next
+
+- Test the ratings against past events, such as the November and December 2022 storms.
+- Compare each forecast with what fell, to show how reliable the outlook is at one, two, and three days out.
+
+<!-- EDIT: point this at your repository -->
+[View the code on GitHub](https://github.com/england-dsa)
