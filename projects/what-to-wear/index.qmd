@@ -6,7 +6,7 @@ categories: [JavaScript, Weather, Interactive, API]
 image: thumbnail.png
 ---
 
-A forecast tells you it will be 38 degrees with a 20 mph wind and a 60% chance of snow. What most people want to know is simpler: do I need the big coat? This page reads the forecast for your town and answers that question, for the next few hours and for each day this week.
+Every morning I open the weather app, look at the high and low, and decide what to wear. Most of the time that works. But every now and then the wind catches me off guard, or the rain does, or I forget gloves on a day I really needed them. I built this to help myself, because I believe I've found the right rules for making these decisions. Feel free to adjust them if you run warmer or colder. I definitely run warmer than most.
 
 ::: {.column-page-inset}
 
