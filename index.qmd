@@ -1,6 +1,6 @@
 ---
 title: "Hi, I'm John."
-subtitle: "Data analyst and data scientist. I turn messy data into clear answers with Power BI, Python, and SQL."
+subtitle: "Thanks for visiting! Here are some of my projects. I've only just started sharing my work. More to come."
 listing:
   contents: projects
   type: grid
