@@ -1,12 +1,16 @@
 ---
 title: "Ride the Buffalo Weather Balloon"
-description: "An interactive, plain-language ride up the latest National Weather Service balloon from Buffalo airport. It loads the newest flight by itself."
+description: "Weather balloons are cool but hard to interpret. This page breaks each launch down into an easy-to-absorb format."
 date: 2026-09-18
 categories: [JavaScript, Weather, Interactive, API]
 image: thumbnail.png
 ---
 
-Twice a day, the National Weather Service releases a balloon from Buffalo airport. It carries a small instrument that measures temperature, humidity and wind on the way up, to about 20 miles above the ground. Forecasters read the result as a dense technical chart. This page shows the same flight in plain language: move the balloon and see what it felt at each height.
+The National Weather Service forecast office near the Buffalo, NY airport typically launches two weather balloons a day. Each balloon carries a radiosonde, an instrument that measures temperature and humidity on the way up. Fun fact: the radiosonde doesn't measure wind directly. Wind speed is calculated from how the balloon moves over time, which is so cool.
+
+I've had the pleasure of launching a number of weather balloons in my life, and it's a great time. It's also important work: these flights give us observations through the full vertical profile of the atmosphere, not just at the ground.
+
+Meteorologists typically view this data on a niche chart called a Skew-T, which is very difficult to read for anyone who isn't a meteorologist. That brings me to this project. I wanted a way to (1) show the useful weather data these instruments collect and (2) show off how cool weather balloons can be!
 
 ::: {.column-page-inset}
 
