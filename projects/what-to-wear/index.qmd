@@ -1,0 +1,64 @@
+---
+title: "What Should I Wear?"
+description: "A live outfit recommendation for Western New York towns, for right now and the week ahead, built on the National Weather Service forecast."
+date: 2026-10-04
+categories: [JavaScript, Weather, Interactive, API]
+image: thumbnail.png
+---
+
+A forecast tells you it will be 38 degrees with a 20 mph wind and a 60% chance of snow. What most people want to know is simpler: do I need the big coat? This page reads the forecast for your town and answers that question, for the next few hours and for each day this week.
+
+::: {.column-page-inset}
+
+{{< include _wear.html >}}
+
+:::
+
+## How it decides
+
+Everything is based on what it will feel like, not the air temperature alone. Wind makes cold air feel colder and humidity makes hot air feel hotter, so the page works out a "feels like" temperature for every hour first.
+
+It then dresses you for the cooler half of the period: halfway between the coldest and warmest hours, but never more than 10 degrees above the coldest. If the coldest hour needs more than that, it adds an extra layer and tells you when.
+
+| Feels like | Outer layer |
+|---|---|
+| 78°F and up | T-shirt and shorts |
+| 68 to 77 | T-shirt |
+| 58 to 67 | Long sleeves |
+| 48 to 57 | Light jacket or sweater |
+| 38 to 47 | Warm jacket |
+| 25 to 37 | Winter coat |
+| Below 25 | Heavy winter coat |
+
+Extras are added on top of that:
+
+- **Hat and gloves** at 35°F or colder, and a **scarf** at 20°F or colder.
+- **Umbrella or rain jacket** when rain is at least 50% likely, and a reminder to pack one at 30%. If the wind is 20 mph or more, it tells you to use a hood instead, because the umbrella will lose.
+- **Waterproof boots** when snow is at least 30% likely.
+- **Layers** when the day warms up by 15 degrees or more.
+- **Hat, gloves and scarf** always go by the coldest hour, not the middle.
+- **Sunglasses** when it is mostly sunny.
+
+"Now" covers the next 12 hours and counts only the hours between 7 AM and 9 PM, so a cold 3 AM does not put you in a parka for a mild afternoon. Each day in the week ahead uses the same hours.
+
+## Why town by town
+
+Lake-effect snow is narrow. Orchard Park can need boots on a morning when Amherst does not, so every town gets its own forecast. Your choice is remembered on your device for next time.
+
+## The data
+
+Forecasts come from the [National Weather Service API](https://www.weather.gov/documentation/services-web-api), which is free and public. The page stores nothing. Each time it opens, your browser asks the API for the hourly forecast at the town you picked and works out the outfit on the spot.
+
+## Limits
+
+- **The thresholds are my own judgment.** People run warm or cold. Treat the outfit as a starting point.
+- **It only knows the forecast.** If the forecast is wrong, the outfit is wrong.
+- **The hourly forecast runs about six days out,** so the week ahead stops there, and later days are less reliable.
+- **It dresses you for standing or walking outside.** Running, shoveling or sitting in a cold stadium for three hours all call for something different.
+
+## What's next
+
+- A "runs warm / runs cold" setting that shifts every threshold.
+- Activity presets, such as a Bills game, a run, or walking the dog.
+
+[View the code on GitHub](https://github.com/england-dsa/england-dsa.github.io/tree/main/projects/what-to-wear)

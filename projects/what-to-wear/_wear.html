@@ -1,0 +1,221 @@
+<!-- What Should I Wear: live outfit recommendation. Forecasts are fetched in the browser from the National Weather Service API. -->
+<style>
+.wtw{--ink:#12233B;--muted:#55657C;--line:#D6DEE9;--soft:#F4F7FB;--accent:#1B5FB8;color:var(--ink);display:flex;flex-direction:column;gap:26px;margin-block:1.75rem;line-height:1.5;font-size:1rem}
+.wtw *{box-sizing:border-box}
+.wtw [hidden]{display:none!important}
+.wtw p,.wtw ul,.wtw h3,.wtw h4,.wtw label{margin:0;padding:0}
+.wtw h3{font-size:1.4rem;font-weight:700;border:0;line-height:1.15}
+.wtw-bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;border-block:1px solid var(--line);padding-block:12px}
+.wtw-bar label{font-size:.8rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.wtw-bar select{font:inherit;font-size:.95rem;line-height:1.4;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.wtw-bar select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wtw-upd{color:var(--muted);font-size:.88rem;margin-left:auto}
+.wtw-status{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:26px 22px;display:flex;flex-direction:column;gap:8px}
+.wtw-status strong{font-size:1.2rem}
+.wtw-status p{color:var(--muted);max-width:60ch}
+.wtw-body{display:flex;flex-direction:column;gap:30px}
+.wtw-now{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:22px 26px}
+.wtw-fig svg{display:block;width:100%;height:auto}
+.wtw-nowtext{display:flex;flex-direction:column;gap:12px;min-width:0}
+.wtw-eyebrow{font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wtw-head{font-size:clamp(1.6rem,3.6vw,2.3rem);font-weight:700;line-height:1.1;letter-spacing:-0.01em;text-wrap:balance}
+.wtw-sub{color:var(--muted);font-size:1.02rem;max-width:56ch}
+.wtw-list{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 24px;margin-top:4px}
+.wtw-list li{border-top:1px solid var(--line);padding-block:9px;display:flex;flex-direction:column}
+.wtw-list b{font-weight:600}
+.wtw-list span{color:var(--muted);font-size:.9rem}
+.wtw-sec{display:flex;flex-direction:column;gap:12px}
+.wtw-hours{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(58px,1fr);overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.wtw-hour{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-left:1px solid var(--line);font-variant-numeric:tabular-nums}
+.wtw-hour:first-child{border-left:0}
+.wtw-hour .t{font-size:.78rem;color:var(--muted)}
+.wtw-hour .f{font-size:1.15rem;font-weight:600}
+.wtw-hour .s{font-size:.74rem;color:var(--muted);text-align:center;line-height:1.2}
+.wtw-hour .p{font-size:.78rem;color:var(--accent);font-weight:600;min-height:1.2em}
+.wtw-note{color:var(--muted);font-size:.9rem}
+.wtw-week{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:12px}
+.wtw-day{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.wtw-day .d{font-weight:700}
+.wtw-day .d small{display:block;font-weight:400;color:var(--muted);font-size:.85rem}
+.wtw-day svg{display:block;width:74%;height:auto;margin:2px auto 0}
+.wtw-day .w{font-weight:600;line-height:1.25}
+.wtw-day .r{color:var(--muted);font-size:.86rem;line-height:1.35;font-variant-numeric:tabular-nums}
+@media (max-width:640px){
+  .wtw-now{grid-template-columns:minmax(0,1fr);padding:18px;gap:14px}
+  .wtw-fig{max-width:190px;margin:0 auto}
+  .wtw-upd{margin-left:0}
+}
+</style>
+<div id="wtw-root" class="wtw"></div>
+<script>
+(function(){
+const TOWNS=[['buffalo','Buffalo (downtown)',42.8864,-78.8784],['amherst','Amherst',42.9784,-78.7998],['cheektowaga','Cheektowaga',42.9034,-78.7548],['tonawanda','Tonawanda',43.0203,-78.8803],['grand-island','Grand Island',43.0331,-78.9628],['niagara-falls','Niagara Falls',43.0962,-79.0377],['lockport','Lockport',43.1706,-78.6903],['clarence','Clarence',42.9767,-78.5920],['lancaster','Lancaster',42.9006,-78.6703],['west-seneca','West Seneca',42.8501,-78.7998],['orchard-park','Orchard Park',42.7676,-78.7439],['hamburg','Hamburg',42.7159,-78.8295],['east-aurora','East Aurora',42.7678,-78.6134],['springville','Springville',42.5084,-78.6672],['ellicottville','Ellicottville',42.2751,-78.6731],['batavia','Batavia',42.9981,-78.1875],['dunkirk','Dunkirk',42.4795,-79.3339],['jamestown','Jamestown',42.0970,-79.2353]];
+const root=document.getElementById('wtw-root');
+root.innerHTML=`<div class="wtw-bar"><label for="wtw-town">Town</label><select id="wtw-town"></select><span class="wtw-upd" id="wtw-upd"></span></div>
+<div class="wtw-status" id="wtw-status" role="status"><strong>Checking the forecast&hellip;</strong><p>Fetching the National Weather Service forecast for your town.</p></div>
+<div class="wtw-body" id="wtw-body" hidden>
+<div class="wtw-now"><div class="wtw-fig" id="wtw-fig"></div><div class="wtw-nowtext"><p class="wtw-eyebrow" id="wtw-eyebrow"></p><p class="wtw-head" id="wtw-head"></p><p class="wtw-sub" id="wtw-sub"></p><ul class="wtw-list" id="wtw-list"></ul></div></div>
+<div class="wtw-sec"><h3>Hour by hour</h3><div class="wtw-hours" id="wtw-hours"></div><p class="wtw-note">Large number: what it feels like, in &deg;F, with wind and humidity counted. Blue: chance of rain or snow.</p></div>
+<div class="wtw-sec"><h3>The week ahead</h3><div class="wtw-week" id="wtw-week"></div><p class="wtw-note">Each day is dressed for 7 AM to 9 PM. Later days are less certain.</p></div>
+</div>`;
+const $=id=>document.getElementById('wtw-'+id);
+/* ---------- weather maths ---------- */
+function feels(t,w,rh){
+  if(t<=50&&w>3) return 35.74+0.6215*t-35.75*Math.pow(w,0.16)+0.4275*t*Math.pow(w,0.16);
+  if(t>=80&&rh!=null){ const h=-42.379+2.04901523*t+10.14333127*rh-0.22475541*t*rh-0.00683783*t*t-0.05481717*rh*rh+0.00122874*t*t*rh+0.00085282*t*rh*rh-0.00000199*t*t*rh*rh; return Math.max(t,h); }
+  return t;
+}
+const mph=s=>{const m=String(s||'').match(/\d+/g); return m?Math.max(...m.map(Number)):0;};
+function hourRow(p){
+  const t=p.temperatureUnit==='C'?p.temperature*9/5+32:p.temperature, w=mph(p.windSpeed), rh=p.relativeHumidity&&p.relativeHumidity.value;
+  const s=(p.shortForecast||'').toLowerCase();
+  return {date:p.startTime.slice(0,10),hour:+p.startTime.slice(11,13),t,w,f:Math.round(feels(t,w,rh)),pop:(p.probabilityOfPrecipitation&&p.probabilityOfPrecipitation.value)||0,
+    snow:/snow|flurr|blizzard|sleet|ice pellets|wintry/.test(s),rain:/rain|shower|drizzle|thunder/.test(s),ice:/freezing/.test(s),thunder:/thunder/.test(s),
+    sunny:p.isDaytime&&/sunny|clear/.test(s)&&!/partly sunny|mostly cloudy/.test(s),day:p.isDaytime,short:p.shortForecast||''};
+}
+function stats(H){
+  const lo=H.reduce((a,b)=>b.f<a.f?b:a), hi=H.reduce((a,b)=>b.f>a.f?b:a), wet=H.filter(h=>h.pop>=30);
+  const top=H.reduce((a,b)=>b.pop>a.pop?b:a);
+  return {lo:lo.f,loHour:lo.hour,hi:hi.f,hiHour:hi.hour,base:Math.round(Math.min((lo.f+hi.f)/2,lo.f+10)),pop:top.pop,popHour:top.hour,wind:Math.max(...H.map(h=>h.w)),
+    snow:wet.some(h=>h.snow),rain:wet.some(h=>h.rain),ice:wet.some(h=>h.ice),thunder:wet.some(h=>h.thunder),sunny:H.filter(h=>h.sunny).length>=3};
+}
+/* ---------- the outfit rules ---------- */
+function outfit(s){
+  const o={top:'tee',bottoms:'pants',feet:'sneakers',hat:false,gloves:false,scarf:false,umbrella:false,shell:false,shades:false,sky:null,items:[]};
+  const add=(n,why)=>o.items.push([n,why]), lo=s.lo, b=s.base, band=x=>x>=78?7:x>=68?6:x>=58?5:x>=48?4:x>=38?3:x>=25?2:x>=10?1:0, feelsTxt=s.hi-lo>=4?'Feels like '+lo+'° to '+s.hi+'°':'Feels like about '+lo+'°';
+  if(b>=78){o.top='tee';o.bottoms='shorts';add('T-shirt and shorts',feelsTxt);}
+  else if(b>=68){o.top='tee';o.bottoms=b>=72?'shorts':'pants';add(b>=72?'T-shirt and shorts':'T-shirt and light pants',feelsTxt);}
+  else if(b>=58){o.top='long';add('Long sleeves',feelsTxt);}
+  else if(b>=48){o.top='ljacket';add('Light jacket or sweater',feelsTxt);}
+  else if(b>=38){o.top='jacket';add('Warm jacket',feelsTxt);}
+  else if(b>=25){o.top='coat';add('Winter coat',feelsTxt);}
+  else if(b>=10){o.top='parka';add('Heavy winter coat',feelsTxt);}
+  else {o.top='parka';add('Heaviest coat, with a warm layer under it',feelsTxt+'. Cover exposed skin');}
+  if(band(lo)<band(b)&&lo<68) add('An extra layer for the cold part','Feels like '+lo+'° at '+clock(s.loHour));
+  if(lo<=35){o.hat=true;o.gloves=true;add('Hat and gloves','At or near freezing with the wind counted');}
+  if(lo<=20){o.scarf=true;add('Scarf','Feels like '+lo+'°: keep your face and neck covered');}
+  if(s.hi-lo>=15&&s.hi>=55&&band(lo)>=band(b)) add('Layers you can take off','Warms up to about '+s.hi+'° by '+clock(s.hiHour));
+  const wet=s.pop>=50, maybe=s.pop>=30&&s.pop<50;
+  if(s.snow&&s.pop>=30){o.feet='boots';o.sky='snow';add('Waterproof boots',s.pop+'% chance of snow around '+clock(s.popHour));}
+  else if((s.rain||s.ice)&&wet){ o.sky='rain'; o.feet='boots';
+    if(lo>=48){o.shell=true;add('Rain jacket',s.pop+'% chance of rain around '+clock(s.popHour));}
+    if(s.wind>=20) add('Hood up, skip the umbrella','Wind up to '+s.wind+' mph will fight an umbrella');
+    else {o.umbrella=true;add('Umbrella',lo>=48?'Rain is likely':s.pop+'% chance of rain around '+clock(s.popHour));}
+    add('Waterproof shoes','Wet ground most of the time');
+    if(s.ice) add('Shoes with grip','Freezing rain makes sidewalks slick');
+  } else if((s.rain||s.ice)&&maybe){ o.umbrella=s.wind<20; add('Pack an umbrella',s.pop+'% chance of rain around '+clock(s.popHour)); }
+  if(s.thunder&&s.pop>=30) add('Plan to be indoors for the storm','Thunderstorms are possible');
+  if(o.feet==='sneakers'&&lo<25){o.feet='boots';add('Warm boots or shoes','Cold ground');}
+  if(o.feet==='sneakers'&&lo>=78&&!wet) o.feet='sandals';
+  if(s.wind>=20&&(o.top==='tee'||o.top==='long'||o.top==='ljacket')&&!o.shell) add('Something windproof','Wind up to '+s.wind+' mph');
+  if(s.sunny&&!o.sky){o.shades=true;o.sky='sun';add('Sunglasses','Mostly sunny');}
+  if(s.sunny&&s.hi>=75) add('Sunscreen','Sunny and warm');
+  if(s.hi>=90) add('Light, loose clothes and water','Feels like '+s.hi+'° at the hottest');
+  return o;
+}
+function headline(o){
+  const names={tee:'T-shirt',long:'Long sleeves',ljacket:'Light jacket',jacket:'Warm jacket',coat:'Winter coat',parka:'Heavy winter coat'};
+  const parts=[o.shell?'Rain jacket':names[o.top]];
+  if(o.top==='tee'&&!o.shell&&o.bottoms==='shorts') parts.push('shorts');
+  if(o.hat) parts.push('hat','gloves');
+  if(o.scarf) parts.push('scarf');
+  if(o.feet==='boots'&&o.sky==='snow') parts.push('boots');
+  if(o.umbrella) parts.push('umbrella');
+  if(parts.length===1) return parts[0]==='T-shirt'?'T-shirt weather.':parts[0]+'.';
+  return parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1]+'.';
+}
+const clock=h=>((h+11)%12+1)+(h>=12?' PM':' AM');
+/* ---------- the figure ---------- */
+function figure(o){
+  const INK='#12233B',SKIN='#EADFD2',C={tee:'#2E9CA6',long:'#4C78B5',ljacket:'#7A9B57',jacket:'#C7773A',coat:'#A8423F',parka:'#3B4A7A',shell:'#E5B927'};
+  const col=o.shell?C.shell:C[o.top], heavy=o.top==='coat'||o.top==='parka', outer=heavy||o.top==='jacket'||o.top==='ljacket'||o.shell;
+  const st=' stroke="'+INK+'" stroke-width="2" stroke-linejoin="round"';
+  let s='<svg viewBox="0 0 220 330" role="img" aria-label="Figure dressed for the forecast">';
+  if(o.sky==='sun') s+='<circle cx="34" cy="38" r="17" fill="#F2C230"/>'+[0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180;return '<line x1="'+(34+24*Math.cos(r)).toFixed(1)+'" y1="'+(38+24*Math.sin(r)).toFixed(1)+'" x2="'+(34+31*Math.cos(r)).toFixed(1)+'" y2="'+(38+31*Math.sin(r)).toFixed(1)+'" stroke="#F2C230" stroke-width="3" stroke-linecap="round"/>';}).join('');
+  if(o.sky==='rain') s+=[[22,60],[40,120],[18,180],[44,236],[196,96],[182,170],[200,232],[176,278],[30,292]].map(p=>'<line x1="'+p[0]+'" y1="'+p[1]+'" x2="'+(p[0]-5)+'" y2="'+(p[1]+14)+'" stroke="#5B9BD5" stroke-width="3" stroke-linecap="round"/>').join('');
+  if(o.sky==='snow') s+=[[22,50],[42,112],[16,176],[40,240],[198,60],[184,128],[202,196],[178,262],[28,296],[196,300]].map(p=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4" fill="#FFFFFF" stroke="#9DB7D6" stroke-width="1.5"/>').join('');
+  // legs and feet
+  s+='<rect x="84" y="176" width="22" height="118" rx="8" fill="'+SKIN+'"'+st+'/><rect x="114" y="176" width="22" height="118" rx="8" fill="'+SKIN+'"'+st+'/>';
+  if(o.bottoms==='shorts') s+='<path d="M80 172 H140 V222 H113 V196 H107 V222 H80 Z" fill="#B9A27A"'+st+'/>';
+  else s+='<path d="M80 172 H140 V288 H113 V200 H107 V288 H80 Z" fill="#34425E"'+st+'/>';
+  if(o.feet==='boots') s+='<path d="M78 268 H108 V300 H72 V292 Q72 286 78 286 Z" fill="#5A4634"'+st+'/><path d="M112 268 H142 V286 Q148 286 148 292 V300 H112 Z" fill="#5A4634"'+st+'/>';
+  else if(o.feet==='sandals') s+='<rect x="74" y="292" width="34" height="8" rx="4" fill="#8A6A45"'+st+'/><rect x="112" y="292" width="34" height="8" rx="4" fill="#8A6A45"'+st+'/>';
+  else s+='<rect x="72" y="284" width="36" height="16" rx="7" fill="#F5F5F5"'+st+'/><rect x="112" y="284" width="36" height="16" rx="7" fill="#F5F5F5"'+st+'/>';
+  // arms
+  const armW=heavy?24:20, lx=heavy?52:58, rx=heavy?144:142, armTop=86;
+  const sleeve=o.top==='tee'&&!o.shell?34:84;
+  s+='<rect x="'+lx+'" y="'+armTop+'" width="'+armW+'" height="92" rx="9" fill="'+SKIN+'"'+st+'/>';
+  s+=o.umbrella?'<rect x="'+rx+'" y="'+armTop+'" width="'+armW+'" height="60" rx="9" fill="'+SKIN+'"'+st+'/>':'<rect x="'+rx+'" y="'+armTop+'" width="'+armW+'" height="92" rx="9" fill="'+SKIN+'"'+st+'/>';
+  s+='<rect x="'+lx+'" y="'+armTop+'" width="'+armW+'" height="'+sleeve+'" rx="9" fill="'+col+'"'+st+'/>';
+  s+='<rect x="'+rx+'" y="'+armTop+'" width="'+armW+'" height="'+(o.umbrella?Math.min(sleeve,56):sleeve)+'" rx="9" fill="'+col+'"'+st+'/>';
+  if(o.gloves){ s+='<circle cx="'+(lx+armW/2)+'" cy="176" r="'+(armW/2+1)+'" fill="#2B2B3A"'+st+'/>'; s+='<circle cx="'+(rx+armW/2)+'" cy="'+(o.umbrella?146:176)+'" r="'+(armW/2+1)+'" fill="#2B2B3A"'+st+'/>'; }
+  // torso
+  const tx=heavy?72:76, tw=heavy?76:68, th=o.top==='parka'?132:heavy?118:outer?104:98;
+  s+='<rect x="'+tx+'" y="80" width="'+tw+'" height="'+th+'" rx="14" fill="'+col+'"'+st+'/>';
+  if(outer) s+='<line x1="110" y1="92" x2="110" y2="'+(80+th-4)+'" stroke="'+INK+'" stroke-width="2"/>';
+  if(o.top==='parka'&&!o.shell) s+=[118,146,174].map(y=>'<line x1="'+(tx+6)+'" y1="'+y+'" x2="'+(tx+tw-6)+'" y2="'+y+'" stroke="'+INK+'" stroke-width="1.5" opacity=".45"/>').join('');
+  // head
+  if(o.top==='parka'&&!o.shell) s+='<circle cx="110" cy="52" r="31" fill="#E8DCC8"'+st+'/>';
+  if(o.shell) s+='<path d="M80 62 Q80 18 110 18 Q140 18 140 62 Q140 84 110 84 Q80 84 80 62 Z" fill="'+C.shell+'"'+st+'/>';
+  s+='<circle cx="110" cy="52" r="24" fill="'+SKIN+'"'+st+'/>';
+  if(o.shades) s+='<rect x="93" y="44" width="15" height="10" rx="4" fill="'+INK+'"/><rect x="112" y="44" width="15" height="10" rx="4" fill="'+INK+'"/><line x1="108" y1="48" x2="112" y2="48" stroke="'+INK+'" stroke-width="2"/>';
+  else s+='<circle cx="101" cy="50" r="2.4" fill="'+INK+'"/><circle cx="119" cy="50" r="2.4" fill="'+INK+'"/>';
+  s+='<path d="M102 61 Q110 68 118 61" fill="none" stroke="'+INK+'" stroke-width="2" stroke-linecap="round"/>';
+  if(o.hat) s+='<path d="M85 46 Q85 22 110 22 Q135 22 135 46 Z" fill="#C7453B"'+st+'/><rect x="83" y="40" width="54" height="10" rx="5" fill="#E9E3DA"'+st+'/><circle cx="110" cy="19" r="6" fill="#E9E3DA"'+st+'/>';
+  if(o.scarf) s+='<rect x="84" y="72" width="52" height="15" rx="7" fill="#D9A93A"'+st+'/><rect x="118" y="80" width="14" height="40" rx="5" fill="#D9A93A"'+st+'/>';
+  if(o.umbrella){ const hx=rx+armW/2; s+='<line x1="'+hx+'" y1="150" x2="'+hx+'" y2="34" stroke="'+INK+'" stroke-width="3" stroke-linecap="round"/><path d="M'+(hx-56)+' 40 Q'+hx+' -22 '+(hx+56)+' 40 Z" fill="#3D6DB5"'+st+'/>'; }
+  return s+'</svg>';
+}
+/* ---------- load and render ---------- */
+let req=0;
+async function getJSON(u){ for(let i=0;i<2;i++){ try{ const r=await fetch(u); if(r.ok) return await r.json(); }catch(e){} await new Promise(r=>setTimeout(r,700)); } throw new Error('unavailable'); }
+function status(t,m){ $('body').hidden=true; const s=$('status'); s.hidden=false; s.innerHTML='<strong></strong><p></p>'; s.children[0].textContent=t; s.children[1].textContent=m; }
+const WAKE=h=>h.hour>=7&&h.hour<=21;
+async function load(key){
+  const town=TOWNS.find(t=>t[0]===key)||TOWNS[0], id=++req;
+  status('Checking the forecast…','Fetching the National Weather Service forecast for '+town[1]+'.');
+  try{
+    const pt=await getJSON('https://api.weather.gov/points/'+town[2]+','+town[3]);
+    const hourly=await getJSON(pt.properties.forecastHourly);
+    if(id!==req) return;
+    const now=Date.now(), H=hourly.properties.periods.filter(p=>new Date(p.endTime).getTime()>now).map(hourRow);
+    if(H.length<6) throw new Error('short');
+    render(town,H,hourly.properties.updateTime||hourly.properties.updated);
+  }catch(e){ if(id===req) status('Could not get the forecast','The National Weather Service forecast did not respond. Try again in a minute.'); }
+}
+function render(town,H,updated){
+  // now: the next 12 hours, counting waking hours when there are enough of them
+  const next=H.slice(0,12), awake=next.filter(WAKE), N=awake.length>=3?awake:next, s=stats(N), o=outfit(s), last=N[N.length-1];
+  $('fig').innerHTML=figure(o);
+  $('eyebrow').textContent='Now in '+town[1]+' · through '+clock((last.hour+1)%24);
+  $('head').textContent=headline(o);
+  let sub=s.hi-s.lo>=4?'Feels like '+s.lo+'° at '+clock(s.loHour)+' and '+s.hi+'° at '+clock(s.hiHour)+'.':'Feels like about '+s.lo+'°.';
+  sub+=s.pop>=30?' '+s.pop+'% chance of '+(s.snow?'snow':s.ice?'freezing rain':'rain')+'.':' Dry.';
+  if(s.wind>=15) sub+=' Wind up to '+s.wind+' mph.';
+  $('sub').textContent=sub;
+  $('list').innerHTML=''; o.items.forEach(it=>{const li=document.createElement('li'); li.innerHTML='<b></b><span></span>'; li.children[0].textContent=it[0]; li.children[1].textContent=it[1]; $('list').appendChild(li);});
+  $('hours').innerHTML=''; next.forEach((h,i)=>{const d=document.createElement('div'); d.className='wtw-hour'; d.innerHTML='<span class="t"></span><span class="f"></span><span class="s"></span><span class="p"></span>';
+    d.children[0].textContent=i===0?'Now':clock(h.hour); d.children[1].textContent=h.f+'°'; d.children[2].textContent=h.short; d.children[3].textContent=h.pop>=15?h.pop+'%':''; $('hours').appendChild(d);});
+  // week: one card per day with enough daytime hours
+  const days={}; H.forEach(h=>{(days[h.date]=days[h.date]||[]).push(h);});
+  $('week').innerHTML=''; const today=H[0].date;
+  Object.keys(days).sort().forEach(date=>{ const D=days[date].filter(WAKE); if(D.length<8) return;
+    const ds=stats(D), dout=outfit(ds), dt=new Date(date+'T12:00:00');
+    const card=document.createElement('div'); card.className='wtw-day';
+    card.innerHTML='<div class="d"></div>'+figure(dout)+'<div class="w"></div><div class="r"></div>';
+    card.children[0].innerHTML=(date===today?'Today':dt.toLocaleDateString('en-US',{weekday:'long'}))+'<small></small>'; card.children[0].lastChild.textContent=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    card.children[2].textContent=headline(dout);
+    card.children[3].textContent='Feels like '+ds.lo+'° to '+ds.hi+'°'+(ds.pop>=30?' · '+ds.pop+'% '+(ds.snow?'snow':ds.ice?'freezing rain':'rain'):' · dry');
+    $('week').appendChild(card); });
+  const u=updated?new Date(updated):null;
+  $('upd').textContent=u&&!isNaN(u)?'Forecast issued '+u.toLocaleString('en-US',{weekday:'short',hour:'numeric',minute:'2-digit',timeZone:'America/New_York'})+' Eastern':'';
+  $('status').hidden=true; $('body').hidden=false;
+}
+const sel=$('town'); TOWNS.forEach(t=>{const op=document.createElement('option'); op.value=t[0]; op.textContent=t[1]; sel.appendChild(op);});
+let start=TOWNS[0][0]; const hk=location.hash.slice(1);
+if(TOWNS.some(t=>t[0]===hk)) start=hk; else { try{ const k=localStorage.getItem('wtw-town'); if(TOWNS.some(t=>t[0]===k)) start=k; }catch(e){} }
+sel.value=start;
+sel.addEventListener('change',()=>{ try{localStorage.setItem('wtw-town',sel.value);}catch(e){} history.replaceState(null,'','#'+sel.value); load(sel.value); });
+load(start);
+})();
+</script>
