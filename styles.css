@@ -1,13 +1,30 @@
-/* Clean, minimal look */
-body { font-size: 1.05rem; line-height: 1.65; }
-.navbar { border-bottom: 1px solid #e9ecef; box-shadow: none; }
-.quarto-title .title { font-weight: 700; letter-spacing: -0.02em; }
-.quarto-title .subtitle { color: #5c6670; font-size: 1.15rem; max-width: 46rem; }
-.quarto-grid-item { border: 1px solid #e9ecef; border-radius: 10px; box-shadow: none; transition: transform .15s ease, box-shadow .15s ease; }
-.quarto-grid-item:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.07); }
-.listing-category { border-radius: 999px; }
+/* Style B: crisp and corporate */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+:root { --bg: #ffffff; --card: #ffffff; --ink: #14213d; --muted: #5b6577; --accent: #1d4ed8; --line: #dfe5ee; }
+body { background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; font-size: 1.05rem; line-height: 1.7; }
+h1, h2, h3, .quarto-title .title { color: var(--ink); font-weight: 700; letter-spacing: -0.02em; }
+h2 { border-bottom: 2px solid var(--line) !important; }
+a { color: var(--accent); }
+.navbar { background: #14213d !important; box-shadow: none; }
+.navbar .navbar-brand, .navbar .navbar-title, .navbar .nav-link, .navbar .bi, .navbar .aa-DetachedSearchButtonIcon, .navbar #quarto-search .aa-SubmitIcon { color: #fff !important; }
+.navbar .navbar-title { font-weight: 600; }
+.navbar .nav-link:hover, .navbar .nav-link.active { color: #93c5fd !important; }
+.navbar-toggler-icon { filter: invert(1); }
+.quarto-title .title { font-size: 2.5rem; }
+.quarto-title .subtitle { color: var(--muted); font-size: 1.15rem; max-width: 46rem; }
+.quarto-title-meta-heading { color: var(--accent); }
+.quarto-grid-item { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 6px; box-shadow: 0 1px 3px rgba(20,33,61,.08); transition: box-shadow .15s ease, transform .15s ease; }
+.quarto-grid-item:hover { box-shadow: 0 10px 24px rgba(20,33,61,.14); transform: translateY(-2px); }
+.quarto-grid-item .listing-title { font-weight: 700; color: var(--ink); }
+.quarto-grid-item .card-img-top { border-bottom: 1px solid var(--line); }
+.listing-category, .quarto-category { background: #eaf1fe; border: none !important; border-radius: 4px; color: var(--accent) !important; font-weight: 600; }
+.quarto-listing-category-title { font-weight: 700; }
+.quarto-listing-category .category.active, .quarto-listing-category .category:hover { color: var(--accent); }
+pre, div.sourceCode { background: #f4f6fa !important; border: 1px solid var(--line); border-radius: 6px; }
+pre { padding: .9rem 1rem; }
+.nav-footer { background: #f4f6fa; border-top: 1px solid var(--line); color: var(--muted); }
 
 /* Responsive Power BI embed: keeps a 16:9 report from overflowing on phones */
 .powerbi-embed { position: relative; width: 100%; padding-bottom: calc(56.25% + 56px); margin: 1.5rem 0; }
-.powerbi-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 1px solid #e9ecef; border-radius: 8px; }
-.embed-placeholder { border: 2px dashed #c5ccd3; border-radius: 8px; padding: 3rem 1rem; text-align: center; color: #5c6670; margin: 1.5rem 0; }
+.powerbi-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 1px solid var(--line); border-radius: 8px; }
+.embed-placeholder { background: var(--card); border: 2px dashed var(--line); border-radius: 8px; padding: 3rem 1rem; text-align: center; color: var(--muted); margin: 1.5rem 0; }
