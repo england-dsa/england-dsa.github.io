@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "John | Data Portfolio"        # EDIT: your name
+  title: "John England | Data Portfolio"        # EDIT: your name
   description: "Data analysis and data science projects."
   navbar:
     left:
@@ -12,10 +12,10 @@ website:
         href: about.qmd
     right:
       - icon: github
-        href: https://github.com/YOUR-USERNAME          # EDIT
+        href: https://github.com/england-dsa
         aria-label: GitHub
       - icon: linkedin
-        href: https://www.linkedin.com/in/YOUR-PROFILE   # EDIT
+        href: https://www.linkedin.com/in/england-dsa
         aria-label: LinkedIn
   page-footer:
     center: "Built with Quarto"
@@ -30,4 +30,4 @@ format:
     smooth-scroll: true
 
 execute:
-  enabled: false     # notebooks are shown with their saved outputs; nothing runs at build time
+  enabled: false
