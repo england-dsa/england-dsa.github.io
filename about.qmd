@@ -2,23 +2,38 @@
 title: "About"
 ---
 
-<!-- EDIT: replace everything below with your own story. -->
+Hi there. I'm John England, a data scientist and analyst based in Buffalo, NY. For the last three years I've been building data solutions that turn messy, hard-to-trust data into something people feel comfortable making decisions with.
 
-I'm a data analyst and data scientist who enjoys the whole path from raw data to a decision someone can act on.
+I started in the weather world, studying atmospheric science, where I learned my first data tool: Python. I got the chance to apply it in a few roles and haven't looked back. Graduate school let me turn that passion for data into a profession, and since then I've been working in finance and banking, delivering data solutions and supporting data governance efforts.on and have been working in the Finance/banking domain delivering data solutions and supporting data governance efforts.
+
+[LinkedIn](https://www.linkedin.com/in/england-dsa){.btn .btn-outline-primary}
+[GitHub](https://github.com/england-dsa){.btn .btn-outline-primary}
+[Email](mailto:england.dsa@gmail.com){.btn .btn-outline-primary}
 
 ## What I work with
 
-- **Power BI**: data modeling, DAX, report design
-- **Python**: pandas, matplotlib, scikit-learn
-- **SQL**: querying and shaping data for analysis
+- **Reporting and BI:** Power BI, Power Query, Power Automate, Power Apps, Alteryx, Tableau, Excel
+- **Programming:** SQL (MySQL), Python (pandas, NumPy, scikit-learn, statsmodels)
+- **Modeling:** time series forecasting (ARIMA/SARIMA), regression, classification, clustering, PCA
+- **Data governance:** data lineage and metadata, data quality, DCAM
 
 ## Experience
 
-**Job Title, Company** (Year to Year)
-One or two lines on what you did and the result it produced.
+**M&T Bank** · Financial Analyst II, Finance/Risk Data Governance · Buffalo, NY · 2024 to present
+ 
+**Forensic Weather Consultants** · Severe Weather Consulting Meteorologist · Albany, NY · 2022 to 2024
+ 
+**Research Foundation for SUNY** · Research Aide · Albany, NY · 2021 to 2023
+ 
+**New York State Mesonet** · Atmospheric & Environmental Data Analyst Intern · Albany, NY · 2021 to 2023
+ 
+**National Weather Service** · Weather Forecasting Intern · Albany, NY · 2021 to 2023
 
-## Contact
+## Education
 
-- Email: [you@example.com](mailto:you@example.com)
-- [LinkedIn](https://www.linkedin.com/in/YOUR-PROFILE)
-- [GitHub](https://github.com/YOUR-USERNAME)
+- **M.S. in Data Science & Analytics**, SUNY Buffalo State University, 2024
+- **B.S. in Atmospheric Science & Meteorology**, minor in Mathematics, University at Albany, SUNY, 2023
+
+## Get in touch
+
+The best way to reach me or request a resume is by [email](mailto:england.dsa@gmail.com) or on [LinkedIn](https://www.linkedin.com/in/england-dsa).
