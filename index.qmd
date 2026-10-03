@@ -1,0 +1,52 @@
+---
+title: "Sales Performance Dashboard"
+description: "An interactive Power BI report tracking revenue, margin, and regional trends."
+date: 2026-09-15
+categories: [Power BI, DAX, Dashboard]
+image: thumbnail.png
+---
+
+<!-- EDIT: this is a template project page. Replace the text and the embed. -->
+
+## The question
+
+What was the business problem? Who needed the answer, and what decision did it drive?
+
+## The dashboard
+
+::: {.embed-placeholder}
+**Your Power BI report goes here.**
+In Power BI: File → Embed report → Publish to web, copy the link, then replace this
+block with the embed below.
+:::
+
+<!-- Once you have a Publish to web link, delete the placeholder above and uncomment this:
+
+::: {.powerbi-embed}
+<iframe title="Sales Performance Dashboard" src="PASTE-YOUR-PUBLISH-TO-WEB-URL-HERE" allowfullscreen="true"></iframe>
+:::
+
+No Publish to web access? Use a screenshot or GIF instead:
+![Dashboard overview](dashboard.png)
+-->
+
+## How I built it
+
+- **Data**: where it came from and how you cleaned it (Power Query steps, joins).
+- **Model**: star schema, key relationships.
+- **Measures**: one or two DAX measures worth showing.
+
+```dax
+Revenue YoY % =
+DIVIDE ( [Revenue] - [Revenue LY], [Revenue LY] )
+```
+
+## What I found
+
+1. Finding one, with a number.
+2. Finding two, with a number.
+3. What you would recommend as a result.
+
+## Files
+
+[Download the .pbix](https://github.com/YOUR-USERNAME/YOUR-REPO)

@@ -1,0 +1,14 @@
+---
+title: "Hi, I'm John."
+subtitle: "Data analyst and data scientist. I turn messy data into clear answers with Power BI, Python, and SQL."
+listing:
+  contents: projects
+  type: grid
+  sort: "date desc"
+  categories: true
+  grid-columns: 2
+  image-height: 220px
+  fields: [image, date, title, description, categories]
+page-layout: full
+title-block-banner: false
+---

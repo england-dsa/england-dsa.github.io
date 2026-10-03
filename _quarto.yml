@@ -1,0 +1,33 @@
+project:
+  type: website
+
+website:
+  title: "John | Data Portfolio"        # EDIT: your name
+  description: "Data analysis and data science projects."
+  navbar:
+    left:
+      - text: "Projects"
+        href: index.qmd
+      - text: "About"
+        href: about.qmd
+    right:
+      - icon: github
+        href: https://github.com/YOUR-USERNAME          # EDIT
+        aria-label: GitHub
+      - icon: linkedin
+        href: https://www.linkedin.com/in/YOUR-PROFILE   # EDIT
+        aria-label: LinkedIn
+  page-footer:
+    center: "Built with Quarto"
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: false
+    code-fold: true
+    code-tools: false
+    smooth-scroll: true
+
+execute:
+  enabled: false     # notebooks are shown with their saved outputs; nothing runs at build time

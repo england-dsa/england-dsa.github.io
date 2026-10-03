@@ -1,0 +1,24 @@
+---
+title: "About"
+---
+
+<!-- EDIT: replace everything below with your own story. -->
+
+I'm a data analyst and data scientist who enjoys the whole path from raw data to a decision someone can act on.
+
+## What I work with
+
+- **Power BI**: data modeling, DAX, report design
+- **Python**: pandas, matplotlib, scikit-learn
+- **SQL**: querying and shaping data for analysis
+
+## Experience
+
+**Job Title, Company** (Year to Year)
+One or two lines on what you did and the result it produced.
+
+## Contact
+
+- Email: [you@example.com](mailto:you@example.com)
+- [LinkedIn](https://www.linkedin.com/in/YOUR-PROFILE)
+- [GitHub](https://github.com/YOUR-USERNAME)
