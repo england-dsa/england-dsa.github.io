@@ -1,0 +1,46 @@
+```{=html}
+
+<style>
+.cm { --ink:#14213d; --muted:#5b6577; --line:#dfe5ee; font-size:.95rem; color:var(--ink); }
+.cm h3 { font-size:1.15rem; margin:1.8rem 0 .2rem; }
+.cm-sub { color:var(--muted); font-size:.85rem; margin:0 0 .6rem; }
+.cm-note { background:#f4f6fa; border:1px solid var(--line); border-radius:6px; padding:.6rem .9rem; margin-bottom:1rem; color:var(--muted); }
+.cm-alert { border:1px solid var(--line); border-left:5px solid #d03b3b; border-radius:6px; padding:.7rem .9rem; margin-bottom:.6rem; background:#fff; }
+.cm-alert b { font-size:1.02rem; }
+.cm-alert p { margin:.25rem 0 0; }
+.cm-alert .cm-meta { color:var(--muted); font-size:.85rem; }
+.cm-hero { display:flex; gap:1.25rem; align-items:center; flex-wrap:wrap; border:1px solid var(--line); border-left:8px solid var(--c); border-radius:8px; padding:1.1rem 1.25rem; margin:1rem 0 .5rem; background:#fff; }
+.cm-hero .cm-big { font-size:2.1rem; font-weight:700; line-height:1.1; }
+.cm-hero .cm-when { color:var(--muted); font-size:.85rem; text-transform:uppercase; letter-spacing:.06em; }
+.cm-hero .cm-why { flex:1 1 18rem; }
+.cm-icon { display:inline-flex; align-items:center; justify-content:center; width:1.35em; height:1.35em; border-radius:50%; background:var(--c); color:#fff; font-size:.8em; font-weight:700; flex:none; }
+.cm-hero .cm-icon { font-size:1.4rem; }
+.cm-chip { display:inline-flex; align-items:center; gap:.4rem; border-left:4px solid var(--c); border-radius:4px; padding:.3rem .5rem; font-weight:600; background:color-mix(in srgb, var(--c) 13%, #fff); white-space:nowrap; }
+.cm-none { --c:#c5ccd6; color:var(--muted); font-weight:400; }
+.cm-day { font-weight:700; border-bottom:1px solid var(--line); padding:.9rem 0 .25rem; margin-bottom:.35rem; }
+.cm-win { display:grid; grid-template-columns:8.5rem 1fr; gap:.2rem .75rem; padding:.3rem 0; }
+.cm-win .cm-time small { display:block; color:var(--muted); }
+.cm-group { display:grid; grid-template-columns:7.2rem 1fr; gap:.6rem; align-items:start; padding:.15rem 0; }
+.cm-group .cm-chip { display:flex; }
+.cm-towns { font-weight:600; }
+.cm-detail { display:block; color:var(--muted); font-size:.84rem; line-height:1.4; }
+.cm-scroll { overflow-x:auto; }
+.cm table { width:100%; border-collapse:separate; border-spacing:3px; margin:0; }
+.cm-grid table { min-width:820px; }
+.cm th { text-align:left; font-weight:600; padding:.3rem .35rem; vertical-align:bottom; border:none; font-size:.82rem; }
+.cm th small { display:block; color:var(--muted); font-weight:400; }
+.cm td { padding:0; vertical-align:top; border:none; }
+.cm-grid td.cm-town { font-weight:600; white-space:nowrap; padding:.3rem .5rem .3rem 0; }
+.cm-grid .cm-chip { display:flex; font-size:.78rem; padding:.3rem .35rem; gap:.3rem; }
+.cm-legend { display:flex; gap:1.2rem; flex-wrap:wrap; margin:1rem 0 .4rem; }
+.cm-legend span { display:inline-flex; align-items:center; gap:.4rem; }
+.cm-foot { color:var(--muted); font-size:.82rem; margin-top:.6rem; }
+.cm-rules table { border-spacing:0; }
+.cm-rules td, .cm-rules th { vertical-align:top; padding:.35rem .5rem; border-bottom:1px solid var(--line); font-size:.9rem; }
+@media (max-width:600px) { .cm-win, .cm-group { grid-template-columns:1fr; } }
+</style>
+
+<div class="cm">
+<p>Each town and commute window takes the rating of its worst single factor. Snow combined with gusts of 35 mph or more, or with blowing snow in the NWS forecast, is bumped up one level. An NWS forecast phrase that begins with “Chance” or “Slight Chance” counts one level lower.</p><div class="cm-rules cm-scroll"><table data-quarto-disable-processing="true"><thead><tr><th>Factor</th><th>Elevated</th><th>High</th><th>Severe</th></tr></thead><tbody><tr><th>Snow during the window</th><td>0.5 in or more</td><td>2.0 in or more</td><td>4.0 in or more</td></tr><tr><th>Ice during the window</th><td></td><td>0.01 in or more</td><td>0.1 in or more</td></tr><tr><th>Peak wind gust</th><td>35 mph or more</td><td>50 mph or more</td><td></td></tr><tr><th>Lowest “feels like”</th><td>0°F or colder</td><td>-15°F or colder</td><td></td></tr><tr><th>Lowest visibility</th><td>0.5 mi or less</td><td>0.25 mi or less</td><td></td></tr><tr><th>NWS hourly forecast says</th><td>Sleet<br>Wintry Mix<br>Blowing Snow</td><td>Heavy Snow<br>Freezing Rain<br>Freezing Drizzle</td><td>Blizzard</td></tr><tr><th>NWS alert in effect</th><td>Winter Weather Advisory<br>Cold Weather Advisory<br>Winter Storm Watch</td><td>Winter Storm Warning<br>Lake Effect Snow Warning<br>Extreme Cold Warning</td><td>Blizzard Warning<br>Ice Storm Warning<br>Snow Squall Warning</td></tr></tbody></table></div>
+</div>
+```

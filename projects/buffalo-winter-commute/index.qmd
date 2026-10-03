@@ -1,0 +1,48 @@
+---
+title: "Buffalo Commute Hazard Outlook"
+description: "A self-updating dashboard that rates upcoming downtown Buffalo commutes for winter weather hazards, town by town."
+date: 2026-10-02
+categories: [Python, Weather, Dashboard, API]
+image: thumbnail.png
+---
+
+Will the drive into downtown be a problem tomorrow morning? This dashboard answers that one question for people who work in downtown Buffalo. It pulls the National Weather Service forecast every few hours and rates each weekday commute window, town by town, as Low, Elevated, High, or Severe.
+
+::: {.column-page-inset}
+
+{{< include _dashboard.html >}}
+
+:::
+
+## How the rating works
+
+{{< include _method.html >}}
+
+## Why town by town
+
+Lake effect snow is narrow. A band off Lake Erie can bury Orchard Park while downtown and Amherst see flurries, and a few hours later it can swing north. A single "Buffalo" forecast hides that, so every town is rated on its own forecast. Check your own town and downtown, since your commute runs through both.
+
+## The data
+
+Everything comes from the [National Weather Service API](https://www.weather.gov/documentation/services-web-api), which is free and public. For each town the script pulls:
+
+- **the gridded forecast:** snowfall, ice accumulation, wind gusts, "feels like" temperature, and visibility
+- **the hourly forecast wording**, such as "Heavy Snow and Blowing Snow"
+- **active alerts**, including the forecasters' own "What" and "Impacts" text
+
+A Python script converts the forecast to hourly values, totals them for the morning (6 to 9 a.m.) and evening (4 to 7 p.m.) commute windows, applies the thresholds above, and writes the dashboard. GitHub Actions reruns it on a schedule, so the page stays current without anyone touching it.
+
+## Limits
+
+- **Lake effect bands are hard to place.** A shift of a few miles changes which towns are hit, so treat the ratings as guidance.
+- **Snow and ice amounts are only forecast a few days ahead.** Later windows are rated on wind, cold, and alerts alone, and are marked.
+- **Travel bans and road closures are not included.** Those come from Erie County and the City of Buffalo.
+- **The thresholds are my own judgment**, informed by forecasting experience. They have not yet been tested against past storms.
+
+## What's next
+
+- Test the ratings against past events, such as the November and December 2022 storms.
+- Compare each forecast with what fell, to show how reliable the outlook is at one, two, and three days out.
+
+<!-- EDIT: point this at your repository -->
+[View the code on GitHub](https://github.com/england-dsa)
