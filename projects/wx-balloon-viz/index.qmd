@@ -1,7 +1,7 @@
 ---
 title: "Ride the Buffalo Weather Balloon"
 description: "An interactive, plain-language ride up the latest National Weather Service balloon from Buffalo airport. It loads the newest flight by itself."
-date: 2026-10-03
+date: 2026-09-18
 categories: [JavaScript, Weather, Interactive, API]
 image: thumbnail.png
 ---
